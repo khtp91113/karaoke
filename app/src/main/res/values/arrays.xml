@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="songcategories">
+        <item>語言</item>
+        <item>歌手</item>
+        <item>排行榜</item>
+    </string-array>
+    <string-array name="languages">
+        <item>中</item>
+        <item>英</item>
+        <item>粵</item>
+        <item>台</item>
+        <item>其他</item>
+    </string-array>
+    <string-array name="singer">
+        <item>男</item>
+        <item>女</item>
+        <item>團體</item>
+    </string-array>
+    <string-array name="leaderboard">
+        <item>中</item>
+        <item>英</item>
+        <item>經典</item>
+    </string-array>
+
+
+</resources>
