@@ -1,37 +1,36 @@
 package com.example.karaoke;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
-import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.PlaybackParams;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,9 +39,16 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.karaoke.soundtouch.SoundTouch;
+
+import org.apache.commons.net.ftp.*;
+
 public class MusicActivity extends AppCompatActivity {
 
     private MediaPlayer mediaPlayer = null;
+    private MediaPlayer mediaPlayerOrigin = null;
+    private boolean removeVocalState = true;
+
     private MediaPlayer mediaPlayerLeft = null;
     private MediaPlayer mediaPlayerRight = null;
     private float pitch;
@@ -55,24 +61,25 @@ public class MusicActivity extends AppCompatActivity {
     private float vocalVolume = 0.5f;
     private String outputRecordPath;
     private String outputMusicPath;
+    private String outputTestPath;
+
+    private String username = "user2";
+    private String password = "123456";
+    private String server = "140.116.245.248";
+    private int port = 21;
+
+    String[] permissions = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO};
+    private int ALL_PERMISSION = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music);
-        // ask for external storage permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-            }
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 0);
-            }
-        }
+        // ask for permissions
+        ActivityCompat.requestPermissions(this, permissions, ALL_PERMISSION);
+
+        // check internet status and hint
+        checkInternet();
 
         // set seekbar listener
         SeekBar seekbarMusic = findViewById(R.id.seekBar_music);
@@ -127,7 +134,6 @@ public class MusicActivity extends AppCompatActivity {
         findViewById(R.id.vocal_value).setVisibility(View.INVISIBLE);
         findViewById(R.id.adjust).setVisibility(View.INVISIBLE);
         findViewById(R.id.save).setVisibility(View.INVISIBLE);
-        findViewById(R.id.share).setVisibility(View.INVISIBLE);
         findViewById(R.id.upload).setVisibility(View.INVISIBLE);
 
         handler = new Handler(){
@@ -138,16 +144,71 @@ public class MusicActivity extends AppCompatActivity {
                     findViewById(R.id.listen).setVisibility(View.VISIBLE);
                     findViewById(R.id.adjust).setVisibility(View.VISIBLE);
                     findViewById(R.id.save).setVisibility(View.VISIBLE);
-                    findViewById(R.id.share).setVisibility(View.VISIBLE);
                     findViewById(R.id.upload).setVisibility(View.VISIBLE);
                     findViewById(R.id.key_decrease).setVisibility(View.INVISIBLE);
                     findViewById(R.id.key_increase).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.switchVersion).setVisibility(View.INVISIBLE);
                 }
             }
         };
 
         outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.wav";
         outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/record.wav";
+        outputTestPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/test.wav";
+    }
+
+    public void checkInternet(){
+        ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnected();
+        if (isConnected == false){
+            // pop-up notice no network
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Please check your network status!");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+        else if (activeNetwork.getType() != ConnectivityManager.TYPE_WIFI){
+            // pop-up notice downloading
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Are you sure not using WiFi for downloading music?");
+            builder.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+            builder.setNegativeButton("Go back", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+
+    }
+
+    // TODO not finished yet
+    public void downloadMusic() throws IOException {
+        FTPSClient ftp = new FTPSClient();
+        ftp.connect(server, port);
+        int reply = ftp.getReplyCode();
+        // if connect success
+        if (FTPReply.isPositiveCompletion(reply)){
+            ftp.login(username, password);
+            ftp.setFileType(FTP.BINARY_FILE_TYPE);
+            ftp.enterLocalPassiveMode();
+            ftp.changeWorkingDirectory("/music");
+
+        }
     }
 
     public void loadMusic(View view) throws IOException {
@@ -158,11 +219,15 @@ public class MusicActivity extends AppCompatActivity {
         // decode mp3 file, remove vocal, save as wav file
         File file = new File(outputMusicPath);
         // check if file exist
-        if(file.exists() == false)
-            decode(outputMusicPath); // it takes about 30 seconds
+        if(file.exists() == false) {
+            //    decode(outputMusicPath); // it takes about 30 seconds
+            // ftp get file
+            downloadMusic();
+        }
         // open music file and play
         Uri songUri = Uri.fromFile(file);
         mediaPlayer = MediaPlayer.create(getApplicationContext(), songUri);
+        mediaPlayerOrigin = MediaPlayer.create(getApplicationContext(), R.raw.onion_mayday_cut_wav);
         pitch = 1;
         pitchState = 0; // increase or decrease up to 5 levels
 
@@ -170,7 +235,6 @@ public class MusicActivity extends AppCompatActivity {
         new Thread(new Runnable(){
             @Override
             public void run(){
-                String outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/record.wav";
                 try {
                     record(outputRecordPath);
                 } catch (IOException e) {
@@ -192,6 +256,7 @@ public class MusicActivity extends AppCompatActivity {
             pitchState += 1;
             params.setPitch(pitch);
             mediaPlayer.setPlaybackParams(params);
+            mediaPlayerOrigin.setPlaybackParams(params);
         }
     }
 
@@ -207,6 +272,7 @@ public class MusicActivity extends AppCompatActivity {
             pitchState -= 1;
             params.setPitch(pitch);
             mediaPlayer.setPlaybackParams(params);
+            mediaPlayerOrigin.setPlaybackParams(params);
         }
     }
 
@@ -377,9 +443,10 @@ public class MusicActivity extends AppCompatActivity {
         List<Byte> outputList = new ArrayList<Byte>();
 
         FileOutputStream output = new FileOutputStream(outputPath);
-
+        mediaPlayerOrigin.setVolume(0.0f, 0.0f);
         audioRecord.startRecording();
         mediaPlayer.start();
+        mediaPlayerOrigin.start();
 
         while(mediaPlayer.isPlaying()){
             int size = audioRecord.read(data, 0, minSize);
@@ -392,6 +459,7 @@ public class MusicActivity extends AppCompatActivity {
         audioRecord.release();
 
         writeWavHeader(output, outputList);
+
         Byte[] soundBytes = outputList.toArray(new Byte[outputList.size()]);
         byte[] outputSound = new byte[soundBytes.length];
         int j = 0;
@@ -399,7 +467,6 @@ public class MusicActivity extends AppCompatActivity {
             outputSound[j++] = b.byteValue();
         // write wav data
         output.write(outputSound);
-
         output.close();
 
         // show listen button
@@ -408,11 +475,22 @@ public class MusicActivity extends AppCompatActivity {
         handler.sendMessage(msg);
     }
 
+    // modify music pitch for mix record
+    public void modifyPitch() {
+        if(pitchState == 0)
+            return;
+        SoundTouch st = new SoundTouch();
+        st.setPitchSemiTones(pitchState);
+        st.processFile(outputMusicPath, outputTestPath);
+    }
+
     // listen to record mix with song
-    public void listen_record(View view){
+    public void listen_record(View view) throws IOException {
         if (mediaPlayerLeft == null && mediaPlayerRight == null){
+            modifyPitch();
             // open music & record file and play
-            File fileMusic = new File(outputMusicPath);
+            //File fileMusic = new File(outputMusicPath);
+            File fileMusic = new File(outputTestPath);
             //File fileRecord = new File(outputRecordPath);
             Uri musicUri = Uri.fromFile(fileMusic);
             //Uri recordUri = Uri.fromFile(fileRecord);
@@ -529,11 +607,28 @@ public class MusicActivity extends AppCompatActivity {
         }
     }
 
+    // share record with installed app
     public void share(View view){
-        // TODO
+
     }
 
-    public void upload(View view){
-        // TODO
+    public void upload(View view) {
+
+    }
+
+    // switch origin song or remove vocal version
+    public void switchSong(View view){
+        if (removeVocalState == true){
+            removeVocalState = false;
+            mediaPlayer.setVolume(0.0f, 0.0f);
+            mediaPlayerOrigin.setVolume(1.0f, 1.0f);
+            ((Button) findViewById(R.id.switchVersion)).setText("Remove vocal");
+        }
+        else{
+            removeVocalState = true;
+            mediaPlayer.setVolume(1.0f, 1.0f);
+            mediaPlayerOrigin.setVolume(0.0f, 0.0f);
+            ((Button) findViewById(R.id.switchVersion)).setText("Origin");
+        }
     }
 }

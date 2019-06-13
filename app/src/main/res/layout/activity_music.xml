@@ -138,18 +138,6 @@
         app:layout_constraintTop_toTopOf="@+id/adjust" />
 
     <Button
-        android:id="@+id/share"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:onClick="share"
-        android:text="share"
-        app:layout_constraintBottom_toBottomOf="@+id/upload"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/upload" />
-
-    <Button
         android:id="@+id/upload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -183,4 +171,17 @@
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_music"
         app:layout_constraintStart_toEndOf="@+id/seekBar_music"
         app:layout_constraintTop_toTopOf="@+id/seekBar_music" />
+
+    <Button
+        android:id="@+id/switchVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:onClick="switchSong"
+        android:text="Origin"
+        app:layout_constraintBottom_toTopOf="@+id/key_decrease"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

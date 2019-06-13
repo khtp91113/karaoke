@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+def superpowered_sdk_path = new File(projectDir, '../../../Superpowered')
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -9,6 +11,18 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild.ndkBuild {
+            arguments "NDK_APPLICATION=src/main/jni/Application.mk",
+                    "APP_ALLOW_MISSING_DEPS:=true"
+        }
+        sourceSets.main {
+            jni.srcDirs = ['libs']
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
     }
     buildTypes {
         release {
@@ -25,4 +39,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'commons-net:commons-net:3.6'
 }
