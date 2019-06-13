@@ -269,7 +269,7 @@ public class MusicActivity extends AppCompatActivity {
         if(file.exists() == false) {
             //    decode(outputMusicPath); // it takes about 30 seconds
             // http query song path
-            String[] paths = new QuerySongTask().execute("http://140.116.245.248:12345", musicName).get();
+            String[] paths = new QuerySongTask().execute("http://140.116.245.248:5000", musicName).get();
             if (paths == null){
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("Can't connect to http server");
