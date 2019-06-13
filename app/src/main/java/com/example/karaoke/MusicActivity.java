@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -62,11 +63,13 @@ public class MusicActivity extends AppCompatActivity {
     private String outputRecordPath;
     private String outputMusicPath;
     private String outputTestPath;
+    private String outputLyricPath;
 
-    private String username = "user2";
-    private String password = "123456";
+    private String username = "ftpuser";
+    private String password = "12345678";
     private String server = "140.116.245.248";
     private int port = 21;
+    private String songName = "";
 
     String[] permissions = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO};
     private int ALL_PERMISSION = 101;
@@ -155,6 +158,10 @@ public class MusicActivity extends AppCompatActivity {
         outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.wav";
         outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/record.wav";
         outputTestPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/test.wav";
+        //TODO yun-tin please handle XD
+        outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/lyric.txt";
+
+        songName = "五月天-洋蔥(測試)";
     }
 
     public void checkInternet(){
@@ -195,19 +202,37 @@ public class MusicActivity extends AppCompatActivity {
         }
 
     }
-
-    // TODO not finished yet
+    
     public void downloadMusic() throws IOException {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         FTPSClient ftp = new FTPSClient();
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
         ftp.connect(server, port);
+
         int reply = ftp.getReplyCode();
         // if connect success
         if (FTPReply.isPositiveCompletion(reply)){
             ftp.login(username, password);
             ftp.setFileType(FTP.BINARY_FILE_TYPE);
+            // encrypt channel
+            ftp.execPROT("P");
             ftp.enterLocalPassiveMode();
-            ftp.changeWorkingDirectory("/music");
-
+            // switch to music folder
+            ftp.changeWorkingDirectory("Music");
+            FileOutputStream outputMusic = new FileOutputStream(outputMusicPath);
+            String songPath = new String((songName + ".wav").getBytes("utf-8"), "iso-8859-1");
+            ftp.retrieveFile(songPath, outputMusic);
+            outputMusic.close();
+            // switch to lyric folder
+            ftp.changeToParentDirectory();
+            ftp.changeWorkingDirectory("Lyric");
+            FileOutputStream outputLyric = new FileOutputStream(outputLyricPath);
+            String lyricPath = new String((songName + ".txt").getBytes("utf-8"),"iso-8859-1");
+            ftp.retrieveFile(lyricPath, outputLyric);
+            outputLyric.close();
+            ftp.logout();
+            ftp.disconnect();
         }
     }
 
