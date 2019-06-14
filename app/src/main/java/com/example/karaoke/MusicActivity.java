@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,6 +74,8 @@ public class MusicActivity extends AppCompatActivity {
     private int port = 21;
     private String musicName = "";
 
+    private int UID;
+
     String[] permissions = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO};
     private int ALL_PERMISSION = 101;
 
@@ -82,9 +85,6 @@ public class MusicActivity extends AppCompatActivity {
         setContentView(R.layout.activity_music);
         // ask for permissions
         ActivityCompat.requestPermissions(this, permissions, ALL_PERMISSION);
-
-        // check internet status and hint
-        checkInternet();
 
         // set seekbar listener
         SeekBar seekbarMusic = findViewById(R.id.seekBar_music);
@@ -149,7 +149,6 @@ public class MusicActivity extends AppCompatActivity {
                     findViewById(R.id.listen).setVisibility(View.VISIBLE);
                     findViewById(R.id.adjust).setVisibility(View.VISIBLE);
                     findViewById(R.id.save).setVisibility(View.VISIBLE);
-                    findViewById(R.id.upload).setVisibility(View.VISIBLE);
                     findViewById(R.id.key_decrease).setVisibility(View.INVISIBLE);
                     findViewById(R.id.key_increase).setVisibility(View.INVISIBLE);
                     findViewById(R.id.switchVersion).setVisibility(View.INVISIBLE);
@@ -164,8 +163,9 @@ public class MusicActivity extends AppCompatActivity {
         outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/lyric.txt";
         outputOriginPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/origin.wav";
 
-        //TODO get musicName from intent
+        //TODO get musicName, UID from intent
         musicName = "五月天-洋蔥(測試)";
+        UID = 21; // test account
     }
 
     public void checkInternet(){
@@ -267,6 +267,8 @@ public class MusicActivity extends AppCompatActivity {
         File file = new File(outputMusicPath);
         // check if file exist
         if(file.exists() == false) {
+            // check internet status and hint
+            checkInternet();
             //    decode(outputMusicPath); // it takes about 30 seconds
             // http query song path
             String[] paths = new QuerySongTask().execute("http://140.116.245.248:5000", musicName).get();
@@ -497,6 +499,7 @@ public class MusicActivity extends AppCompatActivity {
     }
 
     private void record(String outputPath) throws IOException {
+
         int minSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
         AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100,  AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize);
 
@@ -505,8 +508,10 @@ public class MusicActivity extends AppCompatActivity {
 
         FileOutputStream output = new FileOutputStream(outputPath);
         mediaPlayerOrigin.setVolume(0.0f, 0.0f);
-        audioRecord.startRecording();
+
+
         mediaPlayer.start();
+        audioRecord.startRecording();
         mediaPlayerOrigin.start();
 
         while(mediaPlayer.isPlaying()){
@@ -518,6 +523,8 @@ public class MusicActivity extends AppCompatActivity {
         }
         audioRecord.stop();
         audioRecord.release();
+
+        outputList = adjustRecordLength(outputList);
 
         writeWavHeader(output, outputList);
 
@@ -536,6 +543,20 @@ public class MusicActivity extends AppCompatActivity {
         handler.sendMessage(msg);
     }
 
+    public List<Byte> adjustRecordLength(List<Byte> outputList) throws IOException {
+        // read music size
+        InputStream musicStream = new FileInputStream(outputMusicPath);
+        byte[] music = new byte[musicStream.available()];
+        musicStream.read(music);
+        musicStream.close();
+        int musicDataSize = music.length - 44;
+        int recordDataSize = outputList.size();
+        if (recordDataSize > musicDataSize){
+            outputList.subList(0, recordDataSize-musicDataSize).clear();
+        }
+        return outputList;
+    }
+
     // modify music pitch for mix record
     public void modifyPitch() {
         SoundTouch st = new SoundTouch();
@@ -548,24 +569,23 @@ public class MusicActivity extends AppCompatActivity {
         if (mediaPlayerLeft == null && mediaPlayerRight == null){
             modifyPitch();
             // open music & record file and play
-            //File fileMusic = new File(outputMusicPath);
             File fileMusic = new File(outputTestPath);
-            //File fileRecord = new File(outputRecordPath);
+            File fileRecord = new File(outputRecordPath);
             Uri musicUri = Uri.fromFile(fileMusic);
-            //Uri recordUri = Uri.fromFile(fileRecord);
+            Uri recordUri = Uri.fromFile(fileRecord);
             mediaPlayerLeft = MediaPlayer.create(getApplicationContext(), musicUri);
-            //mediaPlayerRight = MediaPlayer.create(getApplicationContext(), recordUri);
+            mediaPlayerRight = MediaPlayer.create(getApplicationContext(), recordUri);
 
             /////// for test!!!!!! ////////////
-            mediaPlayerRight = MediaPlayer.create(getApplicationContext(), R.raw.onion_mayday_cut_wav);
+            //mediaPlayerRight = MediaPlayer.create(getApplicationContext(), R.raw.onion_mayday_cut_wav);
 
             // play music in left channel, vocal in right channel
             // get volume, default 50% vocal 50% music
             mediaPlayerLeft.setVolume(musicVolume, 0f);
             mediaPlayerRight.setVolume(0f, vocalVolume);
-
-            mediaPlayerLeft.start();
             mediaPlayerRight.start();
+            mediaPlayerLeft.start();
+
         }
         else if(mediaPlayerLeft.isPlaying() == false && mediaPlayerRight.isPlaying() == false){
             // play music in left channel, vocal in right channel
@@ -613,10 +633,10 @@ public class MusicActivity extends AppCompatActivity {
             }
             // read file
             InputStream musicStream = new FileInputStream(outputTestPath);
-            //InputStream vocalStream = new FileInputStream(outputRecordPath);
+            InputStream vocalStream = new FileInputStream(outputRecordPath);
 
             ////// For test //////
-            InputStream vocalStream = getResources().openRawResource(R.raw.onion_mayday_cut_wav);
+            //InputStream vocalStream = getResources().openRawResource(R.raw.onion_mayday_cut_wav);
 
             byte[] music = new byte[musicStream.available()];
             musicStream.read(music);
@@ -663,6 +683,7 @@ public class MusicActivity extends AppCompatActivity {
 
             output.close();
             Toast.makeText(this, "File Saved", Toast.LENGTH_SHORT).show();
+            findViewById(R.id.upload).setVisibility(View.VISIBLE);
         }
     }
 
@@ -671,8 +692,66 @@ public class MusicActivity extends AppCompatActivity {
 
     }
 
-    public void upload(View view) {
+    public void upload(View view) throws ExecutionException, InterruptedException, IOException {
+        findViewById(R.id.upload).setEnabled(false);
+        String path = new uploadRecordTask().execute("http://140.116.245.248:5000", musicName, String.valueOf(UID)).get();
+        if (path == null){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Can't connect to http server");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+        // ftp get file
+        ftpUploadRecord(path);
+        Toast.makeText(this, "upload done", Toast.LENGTH_SHORT).show();
+        findViewById(R.id.upload).setEnabled(true);
+    }
 
+    public void ftpUploadRecord(String path) throws IOException {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        FTPSClient ftp = new FTPSClient();
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+        ftp.connect(server, port);
+
+        int reply = ftp.getReplyCode();
+        // if connect success
+        if (FTPReply.isPositiveCompletion(reply)){
+            ftp.login(username, password);
+            ftp.setFileType(FTP.BINARY_FILE_TYPE);
+            // encrypt channel
+            ftp.execPROT("P");
+            ftp.enterLocalPassiveMode();
+            // switch to Record folder
+            if (ftp.changeWorkingDirectory(path) == false){
+                ftp.makeDirectory(path);
+                ftp.changeWorkingDirectory(path);
+            }
+            FileInputStream inputRecord = new FileInputStream(outputRecordPath);
+            String songPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
+            ftp.storeFile(songPath, inputRecord);
+            inputRecord.close();
+            ftp.logout();
+            ftp.disconnect();
+        }
+        else{
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Can't Connect to ftp server!");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
     }
 
     // switch origin song or remove vocal version
