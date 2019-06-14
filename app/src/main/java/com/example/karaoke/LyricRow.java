@@ -1,7 +1,6 @@
 package com.example.karaoke;
 
 public class LyricRow {
-    public final static String TAG = "LyricRow";
 
     /**
      * 歌詞要播放的時間

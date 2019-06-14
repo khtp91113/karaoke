@@ -152,8 +152,10 @@ public class MusicActivity extends AppCompatActivity {
                     findViewById(R.id.save).setVisibility(View.VISIBLE);
                     findViewById(R.id.share).setVisibility(View.VISIBLE);
                     findViewById(R.id.upload).setVisibility(View.VISIBLE);
-                    findViewById(R.id.key_decrease).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.key_increase).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.flatButton).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.flatImage).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.sharpButton).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.sharpImage).setVisibility(View.INVISIBLE);
                 }
             }
         };

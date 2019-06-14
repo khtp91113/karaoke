@@ -1,7 +1,5 @@
 package com.example.karaoke;
 
-import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -13,7 +11,6 @@ import java.util.List;
  */
 
 public class LyricBuilder {
-    static final String TAG = "LyricBuilder";
 
     public List<LyricRow> getLrcRows(String rawLrc){
         if (rawLrc == null || rawLrc.length() == 0) return null;

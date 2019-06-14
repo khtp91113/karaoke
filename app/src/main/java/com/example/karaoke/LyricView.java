@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LyricView extends View {
-    public final static String TAG = "LyricView";
-
 
 
     /**

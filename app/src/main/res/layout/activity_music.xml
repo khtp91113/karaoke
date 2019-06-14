@@ -29,68 +29,16 @@
 
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.157"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/key_decrease"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginBottom="8dp"
-        android:onClick="keyDecrease"
-        android:text="key--"
-        app:layout_constraintBottom_toTopOf="@+id/adjust"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/key_increase"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:onClick="keyIncrease"
-        android:text="key++"
-        app:layout_constraintBottom_toBottomOf="@+id/key_decrease"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/key_decrease" />
-
-    <Button
-        android:id="@+id/listen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:onClick="listen_record"
-        android:text="Listen"
-        app:layout_constraintBottom_toBottomOf="@+id/adjust"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/adjust" />
-
-    <Button
-        android:id="@+id/adjust"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:onClick="show_adjust"
-        android:text="adjust"
-        app:layout_constraintBottom_toTopOf="@+id/upload"
-        app:layout_constraintEnd_toStartOf="@+id/save"
-        app:layout_constraintHorizontal_bias="0.495"
-        app:layout_constraintStart_toEndOf="@+id/listen" />
 
     <SeekBar
         android:id="@+id/seekBar_music"
         android:layout_width="149dp"
-        android:layout_height="47dp"
+        android:layout_height="30dp"
         android:layout_marginBottom="8dp"
         android:max="100"
         android:min="0"
@@ -102,15 +50,18 @@
     <SeekBar
         android:id="@+id/seekBar_vocal"
         android:layout_width="148dp"
-        android:layout_height="51dp"
+        android:layout_height="30dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:max="100"
         android:min="0"
         android:progress="50"
         app:layout_constraintBottom_toTopOf="@+id/seekBar_music"
-        app:layout_constraintStart_toEndOf="@+id/text_vocal" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/text_music"
@@ -131,48 +82,13 @@
         android:id="@+id/text_vocal"
         android:layout_width="43dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:text="Vocal"
-        app:layout_constraintBottom_toBottomOf="@+id/seekBar_vocal"
-        app:layout_constraintStart_toEndOf="@+id/key_decrease"
-        app:layout_constraintTop_toTopOf="@+id/seekBar_vocal" />
-
-    <Button
-        android:id="@+id/save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:onClick="save"
-        android:text="save"
-        app:layout_constraintBottom_toBottomOf="@+id/adjust"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/adjust" />
-
-    <Button
-        android:id="@+id/share"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:onClick="share"
-        android:text="share"
-        app:layout_constraintBottom_toBottomOf="@+id/upload"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/upload" />
-
-    <Button
-        android:id="@+id/upload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:onClick="upload"
-        android:text="upload"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:text="Vocal"
+        app:layout_constraintBottom_toBottomOf="@+id/seekBar_vocal"
+        app:layout_constraintEnd_toStartOf="@+id/seekBar_vocal"
+        app:layout_constraintTop_toTopOf="@+id/seekBar_vocal" />
 
     <TextView
         android:id="@+id/vocal_value"
@@ -183,7 +99,8 @@
         android:text="50%"
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_vocal"
         app:layout_constraintStart_toEndOf="@+id/seekBar_vocal"
-        app:layout_constraintTop_toTopOf="@+id/seekBar_vocal" />
+        app:layout_constraintTop_toTopOf="@+id/seekBar_vocal"
+        app:layout_constraintVertical_bias="0.281" />
 
     <TextView
         android:id="@+id/music_value"
@@ -196,5 +113,128 @@
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_music"
         app:layout_constraintStart_toEndOf="@+id/seekBar_music"
         app:layout_constraintTop_toTopOf="@+id/seekBar_music" />
+
+    <ImageButton
+        android:id="@+id/flatButton"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="70dp"
+        android:background="#00000000"
+        android:onClick="keyDecrease"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar_vocal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lrcView"
+        app:srcCompat="@drawable/yrec" />
+
+    <ImageView
+        android:id="@+id/flatImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/flatButton"
+        app:layout_constraintEnd_toEndOf="@+id/flatButton"
+        app:layout_constraintHorizontal_bias="0.54"
+        app:layout_constraintStart_toStartOf="@+id/flatButton"
+        app:layout_constraintTop_toTopOf="@+id/flatButton"
+        app:srcCompat="@drawable/flat" />
+
+    <ImageButton
+        android:id="@+id/sharpButton"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="#00000000"
+        android:onClick="keyIncrease"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/flatButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/flatButton"
+        app:srcCompat="@drawable/rrec" />
+
+    <ImageView
+        android:id="@+id/sharpImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/sharpButton"
+        app:layout_constraintEnd_toEndOf="@+id/sharpButton"
+        app:layout_constraintStart_toStartOf="@+id/sharpButton"
+        app:layout_constraintTop_toTopOf="@+id/sharpButton"
+        app:srcCompat="@drawable/sharp" />
+
+    <ImageButton
+        android:id="@+id/upload"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginEnd="80dp"
+        android:layout_marginRight="80dp"
+        android:layout_marginBottom="8dp"
+        android:background="#00000000"
+        android:onClick="upload"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/upload3" />
+
+    <ImageButton
+        android:id="@+id/save"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="#00000000"
+        android:onClick="save"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/adjust"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/adjust"
+        app:srcCompat="@drawable/save3" />
+
+    <ImageButton
+        android:id="@+id/share"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginLeft="80dp"
+        android:layout_marginBottom="8dp"
+        android:background="#00000000"
+        android:onClick="share"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/share3" />
+
+    <ImageButton
+        android:id="@+id/listen"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:background="#00000000"
+        android:onClick="listen_record"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/adjust"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/adjust"
+        app:srcCompat="@drawable/listen3" />
+
+    <ImageButton
+        android:id="@+id/adjust"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="90dp"
+        android:background="#00000000"
+        android:onClick="show_adjust"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/save"
+        app:layout_constraintStart_toEndOf="@+id/listen"
+        app:srcCompat="@drawable/adjust3" />
 
 </android.support.constraint.ConstraintLayout>
