@@ -1,14 +1,11 @@
 package com.example.karaoke;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.AssetFileDescriptor;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaCodec;
-import android.media.MediaExtractor;
-import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.PlaybackParams;
@@ -19,7 +16,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,7 +28,6 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,11 +35,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import com.example.karaoke.soundtouch.SoundTouch;
-
-import org.apache.commons.net.ftp.*;
 
 public class MusicActivity extends AppCompatActivity {
 
@@ -57,11 +49,11 @@ public class MusicActivity extends AppCompatActivity {
     private float pitch;
     private int pitchState;
     private final float pitch_interval = 1.05946f;
-    private int song_id = R.raw.onion_mayday_cut;
-    private Handler handler;
-    private final int SHOW_LISTEN_BUTTON = 0;
+    protected static Handler handler;
+
     private float musicVolume = 0.5f;
     private float vocalVolume = 0.5f;
+
     private String outputRecordPath;
     private String outputMusicPath;
     private String outputTestPath;
@@ -72,9 +64,12 @@ public class MusicActivity extends AppCompatActivity {
     private String password = "12345678";
     private String server = "140.116.245.248";
     private int port = 21;
-    private String musicName = "";
 
+    private String musicName = "";
     private int UID;
+
+    private AlertDialog dialog = null;
+    private ProgressDialog progressDialog = null;
 
     String[] permissions = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO};
     private int ALL_PERMISSION = 101;
@@ -145,13 +140,45 @@ public class MusicActivity extends AppCompatActivity {
             @Override
             public void handleMessage(Message message){
                 // show listen button, hide key increase & decrease button
-                if (message.what == SHOW_LISTEN_BUTTON){
+                if (message.what == R.integer.SHOW_LISTEN_BUTTON){
                     findViewById(R.id.listen).setVisibility(View.VISIBLE);
                     findViewById(R.id.adjust).setVisibility(View.VISIBLE);
                     findViewById(R.id.save).setVisibility(View.VISIBLE);
                     findViewById(R.id.key_decrease).setVisibility(View.INVISIBLE);
                     findViewById(R.id.key_increase).setVisibility(View.INVISIBLE);
                     findViewById(R.id.switchVersion).setVisibility(View.INVISIBLE);
+                }
+                else if(message.what == R.integer.CANT_CONNECT_HTTP_SERVER){
+                    server_disconnect_alert("http");
+                }
+                else if(message.what == R.integer.CANT_CONNECT_FTP_SERVER){
+                    server_disconnect_alert("ftp");
+                }
+                else if(message.what == R.integer.Download_Done){
+                    if (progressDialog != null) {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                progressDialog.dismiss();
+                                Toast.makeText(MusicActivity.this, "Download done", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                    try {
+                        mediaPlayerSetup();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(message.what == R.integer.Upload_Done){
+                    if (progressDialog != null) {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                progressDialog.dismiss();
+                                findViewById(R.id.upload).setEnabled(true);
+                                Toast.makeText(MusicActivity.this, "Upload done", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
                 }
             }
         };
@@ -162,10 +189,51 @@ public class MusicActivity extends AppCompatActivity {
         //TODO yun-tin please handle XD
         outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/lyric.txt";
         outputOriginPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/origin.wav";
-
         //TODO get musicName, UID from intent
         musicName = "五月天-洋蔥(測試)";
         UID = 21; // test account
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        File file = new File(outputMusicPath);
+        File originFile = new File(outputOriginPath);
+        File lyricFile = new File(outputLyricPath);
+        // check if file exist
+        if(file.exists() == false || originFile.exists() == false || lyricFile.exists() == false) {
+            // check internet status and hint
+            checkInternet();
+        }
+        else{
+            Thread thread = new Thread(){
+                @Override
+                public void run(){
+                    try {
+                        Thread.sleep(3000);
+                        handler.sendEmptyMessage(R.integer.Download_Done);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+        }
+    }
+
+    public void server_disconnect_alert(String server){
+        progressDialog.dismiss();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Can't connect to " + server + " server");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                finish();
+            }
+        });
+        dialog = builder.create();
+        dialog.show();
     }
 
     public void checkInternet(){
@@ -192,7 +260,8 @@ public class MusicActivity extends AppCompatActivity {
             builder.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-
+                    progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Downloading...", true, true);
+                    new DownloadMusicTask().execute("http://140.116.245.248:5000", musicName, server, String.valueOf(port), username, password, outputMusicPath, outputOriginPath, outputLyricPath);
                 }
             });
             builder.setNegativeButton("Go back", new DialogInterface.OnClickListener() {
@@ -204,93 +273,20 @@ public class MusicActivity extends AppCompatActivity {
             AlertDialog dialog = builder.create();
             dialog.show();
         }
-
-    }
-    
-    public void downloadMusic(String[] paths) throws IOException {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        FTPSClient ftp = new FTPSClient();
-        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
-        ftp.connect(server, port);
-
-        int reply = ftp.getReplyCode();
-        // if connect success
-        if (FTPReply.isPositiveCompletion(reply)){
-            ftp.login(username, password);
-            ftp.setFileType(FTP.BINARY_FILE_TYPE);
-            // encrypt channel
-            ftp.execPROT("P");
-            ftp.enterLocalPassiveMode();
-            // switch to music folder
-            ftp.changeWorkingDirectory(paths[0]);
-            FileOutputStream outputMusic = new FileOutputStream(outputMusicPath);
-            String songPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
-            ftp.retrieveFile(songPath, outputMusic);
-            outputMusic.close();
-            // switch to removeVocal folder
-            ftp.changeWorkingDirectory(paths[1]);
-            FileOutputStream outputOrigin = new FileOutputStream(outputOriginPath);
-            String originPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
-            ftp.retrieveFile(originPath, outputOrigin);
-            outputMusic.close();
-            // switch to lyric folder
-            ftp.changeToParentDirectory();
-            ftp.changeWorkingDirectory(paths[2]);
-            FileOutputStream outputLyric = new FileOutputStream(outputLyricPath);
-            String lyricPath = new String((musicName + ".txt").getBytes("utf-8"),"iso-8859-1");
-            ftp.retrieveFile(lyricPath, outputLyric);
-            outputLyric.close();
-            ftp.logout();
-            ftp.disconnect();
-        }
         else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Can't Connect to ftp server!");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Downloading...", true, true);
+            new DownloadMusicTask().execute("http://140.116.245.248:5000", musicName, server, String.valueOf(port), username, password, outputMusicPath, outputOriginPath, outputLyricPath);
         }
     }
 
-    public void loadMusic(View view) throws IOException, ExecutionException, InterruptedException {
-        // if music is playing, avoid click button again
-        if (mediaPlayer != null && mediaPlayer.isPlaying() == false){
-            return;
-        }
-        // decode mp3 file, remove vocal, save as wav file
-        File file = new File(outputMusicPath);
-        // check if file exist
-        if(file.exists() == false) {
-            // check internet status and hint
-            checkInternet();
-            //    decode(outputMusicPath); // it takes about 30 seconds
-            // http query song path
-            String[] paths = new QuerySongTask().execute("http://140.116.245.248:5000", musicName).get();
-            if (paths == null){
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("Can't connect to http server");
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-            // ftp get file
-            downloadMusic(paths);
-        }
+    public void mediaPlayerSetup() throws InterruptedException {
         // open music file and play
+        File file = new File(outputMusicPath);
+        File originFile = new File(outputOriginPath);
         Uri songUri = Uri.fromFile(file);
         mediaPlayer = MediaPlayer.create(getApplicationContext(), songUri);
-        mediaPlayerOrigin = MediaPlayer.create(getApplicationContext(), R.raw.onion_mayday_cut_wav);
+        Uri originUri = Uri.fromFile(originFile);
+        mediaPlayerOrigin = MediaPlayer.create(getApplicationContext(), originUri);
         pitch = 1;
         pitchState = 0; // increase or decrease up to 5 levels
 
@@ -340,15 +336,16 @@ public class MusicActivity extends AppCompatActivity {
     }
 
     // decode mp3 to PCM, then convert PCM to wav
-    private void decode(String outputPath) throws IOException {
-        final AssetFileDescriptor fd = getResources().openRawResourceFd(song_id);
+    /*private void decode(String outputPath) throws IOException {
+        //final AssetFileDescriptor fd = getResources().openRawResourceFd(R.raw.onion_mayday_cut_wav);
         MediaExtractor extractor = null;
         MediaFormat mediaFormat = null;
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
             extractor = new MediaExtractor();
             // set source music file
-            extractor.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());
+            extractor.setDataSource(outputMusicPath);
+            //extractor.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());
 
             // find audio track
             for (int i = 0; i < extractor.getTrackCount(); i++){
@@ -454,7 +451,7 @@ public class MusicActivity extends AppCompatActivity {
             codec.release();
             extractor.release();
         }
-    }
+    }*/
 
     private void writeWavHeader(FileOutputStream output, List<Byte> outputList) throws IOException {
         //write wav header
@@ -537,10 +534,10 @@ public class MusicActivity extends AppCompatActivity {
         output.write(outputSound);
         output.close();
 
+        modifyPitch();
+
         // show listen button
-        Message msg = Message.obtain();
-        msg.what = SHOW_LISTEN_BUTTON;
-        handler.sendMessage(msg);
+        handler.sendEmptyMessage(R.integer.SHOW_LISTEN_BUTTON);
     }
 
     public List<Byte> adjustRecordLength(List<Byte> outputList) throws IOException {
@@ -567,7 +564,6 @@ public class MusicActivity extends AppCompatActivity {
     // listen to record mix with song
     public void listen_record(View view) throws IOException {
         if (mediaPlayerLeft == null && mediaPlayerRight == null){
-            modifyPitch();
             // open music & record file and play
             File fileMusic = new File(outputTestPath);
             File fileRecord = new File(outputRecordPath);
@@ -687,71 +683,10 @@ public class MusicActivity extends AppCompatActivity {
         }
     }
 
-    // share record with installed app
-    public void share(View view){
-
-    }
-
-    public void upload(View view) throws ExecutionException, InterruptedException, IOException {
+    public void upload(View view) {
         findViewById(R.id.upload).setEnabled(false);
-        String path = new uploadRecordTask().execute("http://140.116.245.248:5000", musicName, String.valueOf(UID)).get();
-        if (path == null){
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Can't connect to http server");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }
-        // ftp get file
-        ftpUploadRecord(path);
-        Toast.makeText(this, "upload done", Toast.LENGTH_SHORT).show();
-        findViewById(R.id.upload).setEnabled(true);
-    }
-
-    public void ftpUploadRecord(String path) throws IOException {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        FTPSClient ftp = new FTPSClient();
-        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
-        ftp.connect(server, port);
-
-        int reply = ftp.getReplyCode();
-        // if connect success
-        if (FTPReply.isPositiveCompletion(reply)){
-            ftp.login(username, password);
-            ftp.setFileType(FTP.BINARY_FILE_TYPE);
-            // encrypt channel
-            ftp.execPROT("P");
-            ftp.enterLocalPassiveMode();
-            // switch to Record folder
-            if (ftp.changeWorkingDirectory(path) == false){
-                ftp.makeDirectory(path);
-                ftp.changeWorkingDirectory(path);
-            }
-            FileInputStream inputRecord = new FileInputStream(outputRecordPath);
-            String songPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
-            ftp.storeFile(songPath, inputRecord);
-            inputRecord.close();
-            ftp.logout();
-            ftp.disconnect();
-        }
-        else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Can't Connect to ftp server!");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }
+        progressDialog = ProgressDialog.show(this, "Please wait", "Uploading...", true, true);
+        new UploadRecordTask().execute("http://140.116.245.248:5000", musicName, server, String.valueOf(port), username, password, String.valueOf(UID), outputRecordPath);
     }
 
     // switch origin song or remove vocal version

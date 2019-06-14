@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="SHOW_LISTEN_BUTTON">0</integer>
+    <integer name="CANT_CONNECT_HTTP_SERVER">1</integer>
+    <integer name="CANT_CONNECT_FTP_SERVER">2</integer>
+    <integer name="Download_Done">3</integer>
+    <integer name="Upload_Done">3</integer>
+</resources>
