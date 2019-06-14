@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#295b75"
     tools:context=".MusicActivity">
 
     <Button
@@ -18,6 +19,18 @@
         android:onClick="loadMusic"
         android:text="Load music"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.example.karaoke.LyricView
+        android:id="@+id/lrcView"
+        android:layout_width="0dp"
+        android:layout_height="269dp"
+
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.157"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -183,4 +196,5 @@
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_music"
         app:layout_constraintStart_toEndOf="@+id/seekBar_music"
         app:layout_constraintTop_toTopOf="@+id/seekBar_music" />
+
 </android.support.constraint.ConstraintLayout>

@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LyricView extends View {
@@ -18,7 +19,7 @@ public class LyricView extends View {
     /**
      * 所有歌詞
      */
-    private List<LyricRow> mLrcRows;
+    private List<LyricRow> mLrcRows = new ArrayList<LyricRow>();
 
     /**Highlight歌詞行數     */
     private int mHighLightRow = 0;
@@ -56,20 +57,21 @@ public class LyricView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         final int height = getHeight();
+        final int width = getWidth();
 
         int rowY = 0;
-        final int rowX = 20; //離左邊的距離
+        final int rowX = width/2;
         int rowNum = 0;
 
 
         //Highlight歌詞
-        int highlightRowY = height / 2 - mLrcFontSize;
-        drawKaraokeHighLightLrcRow(canvas, rowX, highlightRowY);
+        int highlightRowY = height/2 - mLrcFontSize;
+        drawKaraokeHighLightLrcRow(canvas, rowX, width, highlightRowY);
 
 
         mPaint.setColor(mNormalRowColor);
         mPaint.setTextSize(mLrcFontSize);
-        mPaint.setTextAlign(Paint.Align.LEFT);
+        mPaint.setTextAlign(Paint.Align.CENTER);
 
         //其餘歌詞
         rowNum = mHighLightRow - 1;
@@ -95,14 +97,14 @@ public class LyricView extends View {
 
     }
 
-    private void drawKaraokeHighLightLrcRow(Canvas canvas, int rowX, int highlightRowY) {
+    private void drawKaraokeHighLightLrcRow(Canvas canvas, int rowX, int width, int highlightRowY) {
         LyricRow highLrcRow = mLrcRows.get(mHighLightRow);
         String highlightText = highLrcRow.content;
 
         // 普通顏色
         mPaint.setColor(mNormalRowColor);
         mPaint.setTextSize(mHighLightFontSize);
-        mPaint.setTextAlign(Paint.Align.LEFT);
+        mPaint.setTextAlign(Paint.Align.CENTER);
         canvas.drawText(highlightText, rowX, highlightRowY, mPaint);
 
         // 逐字highlight
@@ -117,8 +119,8 @@ public class LyricView extends View {
             mPaint.setTextSize(mHighLightFontSize);
             Bitmap textBitmap = Bitmap.createBitmap(highWidth, highlightRowY + mPaddingY, Bitmap.Config.ARGB_8888);
             Canvas textCanvas = new Canvas(textBitmap);
-            textCanvas.drawText(highlightText, 20, highlightRowY, mPaint);
-            canvas.drawBitmap(textBitmap, 0, 0, mPaint);
+            textCanvas.drawText(highlightText, highLineWidth/2, highlightRowY, mPaint);
+            canvas.drawBitmap(textBitmap, (width-highLineWidth)/2, 0, mPaint);
         }
     }
 

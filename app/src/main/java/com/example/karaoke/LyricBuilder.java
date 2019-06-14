@@ -45,7 +45,8 @@ public class LyricBuilder {
 
 
                     } catch (Exception e) {
-                                            }
+
+                    }
 
                     if (lrcRows != null && lrcRows.size() > 0) {
                         for (LyricRow row : lrcRows) {

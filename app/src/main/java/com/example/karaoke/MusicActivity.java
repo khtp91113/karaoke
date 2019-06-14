@@ -29,16 +29,20 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MusicActivity extends AppCompatActivity {
 
@@ -48,13 +52,21 @@ public class MusicActivity extends AppCompatActivity {
     private float pitch;
     private int pitchState;
     private final float pitch_interval = 1.05946f;
-    private int song_id = R.raw.onion_mayday_cut;
+    private int song_id = R.raw.onion_mayday;
     private Handler handler;
     private final int SHOW_LISTEN_BUTTON = 0;
     private float musicVolume = 0.5f;
     private float vocalVolume = 0.5f;
     private String outputRecordPath;
     private String outputMusicPath;
+
+    /**Lyric params*/
+
+    LyricView mLrcView;
+    private int mPlayerTimerDuration = 100; //每100ms更新歌詞
+    private Timer mTimer;
+    private TimerTask mTask;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,8 +158,16 @@ public class MusicActivity extends AppCompatActivity {
             }
         };
 
-        outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.wav";
+        outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.mp3";
         outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/record.wav";
+
+        /** Lyric initialize*/
+        mLrcView=(LyricView)findViewById(R.id.lrcView);
+        String lrc = getFromAssets("onion.lrc");
+        LyricBuilder builder = new LyricBuilder();
+        List<LyricRow> rows = builder.getLrcRows(lrc);
+        mLrcView.setLrc(rows);
+
     }
 
     public void loadMusic(View view) throws IOException {
@@ -377,9 +397,19 @@ public class MusicActivity extends AppCompatActivity {
         List<Byte> outputList = new ArrayList<Byte>();
 
         FileOutputStream output = new FileOutputStream(outputPath);
-
         audioRecord.startRecording();
         mediaPlayer.start();
+
+
+        /**lyric scrolling*/
+
+        if(mTimer == null){
+            mTimer = new Timer();
+            mTask = new LrcTask();
+            mTimer.scheduleAtFixedRate(mTask, 0, mPlayerTimerDuration);
+        }
+
+
 
         while(mediaPlayer.isPlaying()){
             int size = audioRecord.read(data, 0, minSize);
@@ -420,7 +450,7 @@ public class MusicActivity extends AppCompatActivity {
             //mediaPlayerRight = MediaPlayer.create(getApplicationContext(), recordUri);
 
             /////// for test!!!!!! ////////////
-            mediaPlayerRight = MediaPlayer.create(getApplicationContext(), R.raw.onion_mayday_cut_wav);
+            mediaPlayerRight = MediaPlayer.create(getApplicationContext(), R.raw.onion_mayday);
 
             // play music in left channel, vocal in right channel
             // get volume, default 50% vocal 50% music
@@ -479,7 +509,7 @@ public class MusicActivity extends AppCompatActivity {
             //InputStream vocalStream = new FileInputStream(outputRecordPath);
 
             ////// For test //////
-            InputStream vocalStream = getResources().openRawResource(R.raw.onion_mayday_cut_wav);
+            InputStream vocalStream = getResources().openRawResource(R.raw.onion_mayday);
 
             byte[] music = new byte[musicStream.available()];
             musicStream.read(music);
@@ -536,4 +566,41 @@ public class MusicActivity extends AppCompatActivity {
     public void upload(View view){
         // TODO
     }
+
+
+    /**讀取歌詞內容**/
+
+    public String getFromAssets(String fileName){
+        try {
+            InputStreamReader inputReader = new InputStreamReader( getResources().getAssets().open(fileName) );
+            BufferedReader bufReader = new BufferedReader(inputReader);
+            String line="";
+            String result="";
+            while((line = bufReader.readLine()) != null){
+                if(line.trim().equals(""))
+                    continue;
+                result += line + "\r\n";
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    /**定時task**/
+    class LrcTask extends TimerTask{
+        @Override
+        public void run() {
+            final long timePassed = mediaPlayer.getCurrentPosition();
+            MusicActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    //歌詞向上滾動
+                    mLrcView.seekLrcToTime(timePassed);
+                }
+            });
+
+        }
+    };
 }
