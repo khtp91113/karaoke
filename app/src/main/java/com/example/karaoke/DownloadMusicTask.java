@@ -98,13 +98,13 @@ public class DownloadMusicTask extends AsyncTask<String, Void, String> {
                 // encrypt channel
                 ftp.execPROT("P");
                 ftp.enterLocalPassiveMode();
-                // switch to music folder
+                // switch to removeVocal folder
                 ftp.changeWorkingDirectory(paths[0]);
                 FileOutputStream outputMusic = new FileOutputStream(outputMusicPath);
                 String songPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
                 ftp.retrieveFile(songPath, outputMusic);
                 outputMusic.close();
-                // switch to removeVocal folder
+                // switch to Music folder
                 ftp.changeWorkingDirectory(paths[1]);
                 FileOutputStream outputOrigin = new FileOutputStream(outputOriginPath);
                 String originPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
@@ -114,7 +114,7 @@ public class DownloadMusicTask extends AsyncTask<String, Void, String> {
                 ftp.changeToParentDirectory();
                 ftp.changeWorkingDirectory(paths[2]);
                 FileOutputStream outputLyric = new FileOutputStream(outputLyricPath);
-                String lyricPath = new String((musicName + ".txt").getBytes("utf-8"), "iso-8859-1");
+                String lyricPath = new String((musicName + ".lrc").getBytes("utf-8"), "iso-8859-1");
                 ftp.retrieveFile(lyricPath, outputLyric);
                 outputLyric.close();
                 ftp.logout();

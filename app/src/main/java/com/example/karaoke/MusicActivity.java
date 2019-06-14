@@ -26,15 +26,19 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.example.karaoke.soundtouch.SoundTouch;
 
@@ -73,6 +77,13 @@ public class MusicActivity extends AppCompatActivity {
 
     String[] permissions = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO};
     private int ALL_PERMISSION = 101;
+
+    /**Lyric params*/
+
+    LyricView mLrcView;
+    private int mPlayerTimerDuration = 100; //每100ms更新歌詞
+    private Timer mTimer;
+    private TimerTask mTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +152,13 @@ public class MusicActivity extends AppCompatActivity {
             public void handleMessage(Message message){
                 // show listen button, hide key increase & decrease button
                 if (message.what == R.integer.SHOW_LISTEN_BUTTON){
+                    /*if (progressDialog != null) {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                progressDialog.dismiss();
+                            }
+                        });
+                    }*/
                     findViewById(R.id.listen).setVisibility(View.VISIBLE);
                     findViewById(R.id.adjust).setVisibility(View.VISIBLE);
                     findViewById(R.id.save).setVisibility(View.VISIBLE);
@@ -163,11 +181,7 @@ public class MusicActivity extends AppCompatActivity {
                             }
                         });
                     }
-                    try {
-                        mediaPlayerSetup();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    mediaPlayerSetup();
                 }
                 else if(message.what == R.integer.Upload_Done){
                     if (progressDialog != null) {
@@ -183,20 +197,23 @@ public class MusicActivity extends AppCompatActivity {
             }
         };
 
-        outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.wav";
+        outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.mp3";
         outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/record.wav";
         outputTestPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/test.wav";
         //TODO yun-tin please handle XD
-        outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/lyric.txt";
+        outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/lyric.lrc";
         outputOriginPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/origin.wav";
         //TODO get musicName, UID from intent
-        musicName = "五月天-洋蔥(測試)";
+        musicName = "五月天-洋蔥";
         UID = 21; // test account
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        findViewById(R.id.lrcView).setVisibility(View.INVISIBLE);
+
         File file = new File(outputMusicPath);
         File originFile = new File(outputOriginPath);
         File lyricFile = new File(outputLyricPath);
@@ -279,7 +296,17 @@ public class MusicActivity extends AppCompatActivity {
         }
     }
 
-    public void mediaPlayerSetup() throws InterruptedException {
+    public void mediaPlayerSetup(){
+        /** Lyric initialize*/
+        mLrcView=(LyricView)findViewById(R.id.lrcView);
+        mLrcView.setVisibility(View.VISIBLE);
+        //String lrc = getFromAssets("onion.lrc");
+        String lrc = getFromAssets();
+
+        LyricBuilder builder = new LyricBuilder();
+        List<LyricRow> rows = builder.getLrcRows(lrc);
+        mLrcView.setLrc(rows);
+
         // open music file and play
         File file = new File(outputMusicPath);
         File originFile = new File(outputOriginPath);
@@ -453,7 +480,7 @@ public class MusicActivity extends AppCompatActivity {
         }
     }*/
 
-    private void writeWavHeader(FileOutputStream output, List<Byte> outputList) throws IOException {
+    private void writeWavHeader(FileOutputStream output, int length) throws IOException {
         //write wav header
         short channel = 1;
         int sampleRate = 44100;
@@ -461,7 +488,7 @@ public class MusicActivity extends AppCompatActivity {
 
         byte[] chunkSize = ByteBuffer.allocate(4)
                 .order(ByteOrder.LITTLE_ENDIAN)
-                .putInt(36 + outputList.size() / 2 * channel * bitDepth / 8)
+                .putInt(36 + length / 2 * channel * bitDepth / 8)
                 .array();
 
         byte[] headers = ByteBuffer.allocate(14)
@@ -475,7 +502,7 @@ public class MusicActivity extends AppCompatActivity {
 
         byte[] subChunk2Size = ByteBuffer.allocate(4)
                 .order(ByteOrder.LITTLE_ENDIAN)
-                .putInt(outputList.size() / 2 * channel * bitDepth / 8)
+                .putInt(length / 2 * channel * bitDepth / 8)
                 .array();
 
         output.write(new byte[]{
@@ -506,11 +533,16 @@ public class MusicActivity extends AppCompatActivity {
         FileOutputStream output = new FileOutputStream(outputPath);
         mediaPlayerOrigin.setVolume(0.0f, 0.0f);
 
-
         mediaPlayer.start();
         audioRecord.startRecording();
         mediaPlayerOrigin.start();
 
+        /**lyric scrolling*/
+        if(mTimer == null){
+            mTimer = new Timer();
+            mTask = new LrcTask();
+            mTimer.scheduleAtFixedRate(mTask, 0, mPlayerTimerDuration);
+        }
         while(mediaPlayer.isPlaying()){
             int size = audioRecord.read(data, 0, minSize);
             if (size != AudioRecord.ERROR_INVALID_OPERATION){
@@ -521,9 +553,10 @@ public class MusicActivity extends AppCompatActivity {
         audioRecord.stop();
         audioRecord.release();
 
+        //progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Dealing audio...", true, true);
         outputList = adjustRecordLength(outputList);
 
-        writeWavHeader(output, outputList);
+        writeWavHeader(output, outputList.size());
 
         Byte[] soundBytes = outputList.toArray(new Byte[outputList.size()]);
         byte[] outputSound = new byte[soundBytes.length];
@@ -534,6 +567,7 @@ public class MusicActivity extends AppCompatActivity {
         output.write(outputSound);
         output.close();
 
+        //outputList.clear();
         modifyPitch();
 
         // show listen button
@@ -639,7 +673,6 @@ public class MusicActivity extends AppCompatActivity {
             byte[] vocal = new byte[vocalStream.available()];
             vocalStream.read(vocal);
 
-            List<Byte> outputList = new ArrayList<Byte>();
             // mix vocal & music, ignore 44 bytes header
             for (int i = 44; i < music.length; i += 2){
                 // convert byte to short (16 bits)
@@ -657,8 +690,8 @@ public class MusicActivity extends AppCompatActivity {
                     mix = -1.0f;
                 // save byte
                 short output = (short)(mix * 32768.0f);
-                outputList.add((byte)(output & 0xFF));
-                outputList.add((byte)(output >> 8));
+                music[i] = (byte)(output & 0xFF);
+                music[i+1] = (byte)(output >> 8);
             }
             musicStream.close();
             vocalStream.close();
@@ -666,16 +699,10 @@ public class MusicActivity extends AppCompatActivity {
             // save
             FileOutputStream output = new FileOutputStream(outputRecordPath);
             // write wav header
-            writeWavHeader(output, outputList);
+            writeWavHeader(output, music.length);
 
-            // convert Byte List to byte array
-            Byte[] soundBytes = outputList.toArray(new Byte[outputList.size()]);
-            byte[] outputSound = new byte[soundBytes.length];
-            int j = 0;
-            for(Byte b: soundBytes)
-                outputSound[j++] = b.byteValue();
             // write wav data
-            output.write(outputSound);
+            output.write(music, 44, music.length-44);
 
             output.close();
             Toast.makeText(this, "File Saved", Toast.LENGTH_SHORT).show();
@@ -713,4 +740,41 @@ public class MusicActivity extends AppCompatActivity {
             f.delete();
         }
     }
+
+
+    /**讀取歌詞內容**/
+    public String getFromAssets(){
+        try {
+            //InputStreamReader inputReader = new InputStreamReader( getResources().getAssets().open(fileName) );
+            InputStreamReader inputReader = new InputStreamReader(new FileInputStream(outputLyricPath));
+            BufferedReader bufReader = new BufferedReader(inputReader);
+            String line="";
+            String result="";
+            while((line = bufReader.readLine()) != null){
+                if(line.trim().equals(""))
+                    continue;
+                result += line + "\r\n";
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    /**定時task**/
+    class LrcTask extends TimerTask{
+        @Override
+        public void run() {
+            final long timePassed = mediaPlayer.getCurrentPosition();
+            MusicActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    //歌詞向上滾動
+                    mLrcView.seekLrcToTime(timePassed);
+                }
+            });
+
+        }
+    };
 }
