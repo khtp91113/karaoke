@@ -16,13 +16,13 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,14 +30,12 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
@@ -45,16 +43,13 @@ import java.util.TimerTask;
 
 import com.example.karaoke.soundtouch.SoundTouch;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-
 public class MusicActivity extends AppCompatActivity {
 
     private MediaPlayer mediaPlayer = null;
     private MediaPlayer mediaPlayerOrigin = null;
     private boolean removeVocalState = true;
 
-    private MediaPlayer mediaPlayerLeft = null;
+    //private MediaPlayer mediaPlayerLeft = null;
     private MediaPlayer mediaPlayerRight = null;
     private float pitch;
     private int pitchState;
@@ -80,8 +75,10 @@ public class MusicActivity extends AppCompatActivity {
     private String artistName = "";
     private int UID;
 
+    private ProgressBar timeBar;
     private AlertDialog dialog = null;
     private ProgressDialog progressDialog = null;
+    private boolean restartFlag = false;
 
     String[] permissions = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO};
     private int ALL_PERMISSION = 101;
@@ -109,8 +106,8 @@ public class MusicActivity extends AppCompatActivity {
                 TextView musicValue = findViewById(R.id.music_value);
                 musicValue.setText(String.valueOf(progress) + "%");
                 musicVolume = progress / 100.0f;
-                if (mediaPlayerLeft != null){
-                    mediaPlayerLeft.setVolume(musicVolume, 0f);
+                if (mediaPlayer != null){
+                    mediaPlayer.setVolume(musicVolume, 0f);
                 }
             }
 
@@ -173,6 +170,8 @@ public class MusicActivity extends AppCompatActivity {
                     findViewById(R.id.key_decrease).setVisibility(View.INVISIBLE);
                     findViewById(R.id.key_increase).setVisibility(View.INVISIBLE);
                     findViewById(R.id.switchVersion).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.stop).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.restart).setEnabled(true);
                 }
                 else if(message.what == R.integer.CANT_CONNECT_HTTP_SERVER){
                     server_disconnect_alert("http");
@@ -201,16 +200,24 @@ public class MusicActivity extends AppCompatActivity {
                             }
                         });
                     }
+                    findViewById(R.id.restart).setEnabled(true);
                 }
                 else if(message.what == R.integer.Record_Done){
+                    findViewById(R.id.restart).setEnabled(false);
+                    if (restartFlag == true){
+                        restartFlag = false;
+                        // restart
+                        handler.sendEmptyMessage(R.integer.Download_Done);
+                        return;
+                    }
                     runOnUiThread(new Runnable() {
                         public void run() {
                             progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Dealing record...", true, true);
                         }
                     });
-                    new Thread(new Runnable(){
+                    new Thread(new Runnable() {
                         @Override
-                        public void run(){
+                        public void run() {
                             try {
                                 dealRecord();
                             } catch (IOException e) {
@@ -219,19 +226,25 @@ public class MusicActivity extends AppCompatActivity {
                         }
                     }).start();
                 }
+
             }
         };
 
-        outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.mp3";
-        outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/record.wav";
-        outputTestPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/test.wav";
-        outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/lyric.lrc";
-        outputOriginPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/origin.wav";
-        outputTmpPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tmp.wav";
-        //TODO get musicName, UID from intent
-        musicName = "乾杯";
+        musicName = "洋蔥";
         artistName = "五月天";
         UID = 21; // test account
+
+        File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  + "_music.wav";
+        outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_record.wav";
+        outputTestPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_test.wav";
+        outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_lyric.lrc";
+        outputOriginPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_origin.wav";
+        outputTmpPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_tmp.wav";
+
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -239,29 +252,10 @@ public class MusicActivity extends AppCompatActivity {
         }
 
         findViewById(R.id.lrcView).setVisibility(View.INVISIBLE);
-
-        File file = new File(outputMusicPath);
-        File originFile = new File(outputOriginPath);
-        File lyricFile = new File(outputLyricPath);
-        // check if file exist
-        if(file.exists() == false || originFile.exists() == false || lyricFile.exists() == false) {
-            // check internet status and hint
-            checkInternet();
-        }
-        else{
-            Thread thread = new Thread(){
-                @Override
-                public void run(){
-                    try {
-                        Thread.sleep(3000);
-                        handler.sendEmptyMessage(R.integer.Download_Done);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            thread.start();
-        }
+        findViewById(R.id.restart).setEnabled(false);
+        timeBar = findViewById(R.id.timeBar);
+        // check internet status and hint
+        checkInternet();
     }
 
     public void server_disconnect_alert(String server){
@@ -322,27 +316,49 @@ public class MusicActivity extends AppCompatActivity {
         }
     }
 
-    public void mediaPlayerSetup(){
+    public void initLyric(){
+        // init time
+        timeBar.setProgress(0);
+        int totalTime = mediaPlayer.getDuration();
+        int min = totalTime / 60000;
+        String minStr = String.valueOf(min);
+        if (min < 10)
+            minStr = "0" + minStr;
+        int sec = (totalTime / 1000) % 60;
+        String secStr = String.valueOf(sec);
+        if (sec < 10)
+            secStr = "0" + secStr;
+        ((TextView)findViewById(R.id.endTime)).setText(minStr + ":" + secStr);
+        ((TextView)findViewById(R.id.currentTime)).setText("00:00");
+
         /** Lyric initialize*/
         mLrcView=(LyricView)findViewById(R.id.lrcView);
         mLrcView.setVisibility(View.VISIBLE);
-        //String lrc = getFromAssets("onion.lrc");
         String lrc = getFromAssets();
 
         LyricBuilder builder = new LyricBuilder();
         List<LyricRow> rows = builder.getLrcRows(lrc);
         mLrcView.setLrc(rows);
+    }
 
+    public void mediaPlayerSetup(){
+        // reset song version button text for restart
+        ((Button)(findViewById(R.id.switchVersion))).setText("ORIGIN");
+        removeVocalState = true;
         // open music file and play
         File file = new File(outputMusicPath);
         File originFile = new File(outputOriginPath);
         Uri songUri = Uri.fromFile(file);
         mediaPlayer = MediaPlayer.create(getApplicationContext(), songUri);
+
         Uri originUri = Uri.fromFile(originFile);
         mediaPlayerOrigin = MediaPlayer.create(getApplicationContext(), originUri);
+        mediaPlayerOrigin.setVolume(0.0f, 0.0f);
         pitch = 1;
         pitchState = 0; // increase or decrease up to 5 levels
 
+        initLyric();
+        findViewById(R.id.restart).setEnabled(true);
         // use thread to record
         new Thread(new Runnable(){
             @Override
@@ -548,25 +564,35 @@ public class MusicActivity extends AppCompatActivity {
         output.write(subChunk2Size);
     }
 
-    private void record() throws IOException {
+    public void stopRecord(View view){
+        if (mediaPlayer != null && mediaPlayer.isPlaying())
+            mediaPlayer.stop();
+        if (mediaPlayerOrigin != null && mediaPlayerOrigin.isPlaying())
+            mediaPlayerOrigin.stop();
+    }
 
+    public void scrollLyric(){
+        /**lyric scrolling*/
+        if (mTimer == null) {
+            mTimer = new Timer();
+            mTask = new LrcTask();
+            TimerTask timeTask = new TimeTask();
+            mTimer.scheduleAtFixedRate(mTask, 0, mPlayerTimerDuration);
+            mTimer.scheduleAtFixedRate(timeTask,0, 500);
+        }
+    }
+
+    private void record() throws IOException {
         FileOutputStream tmpOutput = new FileOutputStream(outputTmpPath);
         int minSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
         AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize);
 
         byte[] data = new byte[minSize];
 
-        mediaPlayerOrigin.setVolume(1.0f, 1.0f);
-
+        scrollLyric();
         mediaPlayer.start();
         audioRecord.startRecording();
 
-        /**lyric scrolling*/
-        if (mTimer == null) {
-            mTimer = new Timer();
-            mTask = new LrcTask();
-            mTimer.scheduleAtFixedRate(mTask, 0, mPlayerTimerDuration);
-        }
         while (mediaPlayer.isPlaying()) {
             int size = audioRecord.read(data, 0, minSize);
             if (size != AudioRecord.ERROR_INVALID_OPERATION) {
@@ -575,6 +601,8 @@ public class MusicActivity extends AppCompatActivity {
         }
         audioRecord.stop();
         audioRecord.release();
+        mTimer.cancel();
+        mTimer = null;
 
         tmpOutput.close();
         handler.sendEmptyMessage(R.integer.Record_Done);
@@ -623,35 +651,37 @@ public class MusicActivity extends AppCompatActivity {
     }
 
     // listen to record mix with song
-    public void listen_record(View view) throws IOException {
-        if (mediaPlayerLeft == null && mediaPlayerRight == null){
+    public void listen_record(View view) {
+        if (mediaPlayer == null || mediaPlayerRight == null || (mediaPlayer.isPlaying() == false && mediaPlayerRight.isPlaying() == false)){
             // open music & record file and play
             File fileMusic = new File(outputTestPath);
             File fileRecord = new File(outputTmpPath);
             Uri musicUri = Uri.fromFile(fileMusic);
             Uri recordUri = Uri.fromFile(fileRecord);
-            mediaPlayerLeft = MediaPlayer.create(getApplicationContext(), musicUri);
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), musicUri);
             mediaPlayerRight = MediaPlayer.create(getApplicationContext(), recordUri);
+
+            mediaPlayerRight.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    if (mediaPlayer != null && mediaPlayer.isPlaying())
+                        mediaPlayer.stop();
+                        mTimer.cancel();
+                }
+            });
 
             /////// for test!!!!!! ////////////
             //mediaPlayerRight = MediaPlayer.create(getApplicationContext(), R.raw.onion_mayday_cut_wav);
 
             // play music in left channel, vocal in right channel
             // get volume, default 50% vocal 50% music
-            mediaPlayerLeft.setVolume(musicVolume, 0f);
+            mediaPlayer.setVolume(musicVolume, 0f);
             mediaPlayerRight.setVolume(0f, vocalVolume);
+            initLyric();
+            mTimer = null;
+            scrollLyric();
             mediaPlayerRight.start();
-            mediaPlayerLeft.start();
-
-        }
-        else if(mediaPlayerLeft.isPlaying() == false && mediaPlayerRight.isPlaying() == false){
-            // play music in left channel, vocal in right channel
-            // get volume, default 50% vocal 50% music
-            mediaPlayerLeft.setVolume(musicVolume, 0f);
-            mediaPlayerRight.setVolume(0f, vocalVolume);
-
-            mediaPlayerLeft.start();
-            mediaPlayerRight.start();
+            mediaPlayer.start();
         }
     }
 
@@ -679,14 +709,19 @@ public class MusicActivity extends AppCompatActivity {
 
     public void save(View view) throws IOException {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            findViewById(R.id.restart).setEnabled(false);
             // stop mediaplayer
             if (mediaPlayerRight != null && mediaPlayerRight.isPlaying()) {
                 mediaPlayerRight.stop();
                 mediaPlayerRight = null;
             }
-            if (mediaPlayerLeft != null && mediaPlayerLeft.isPlaying()){
-                mediaPlayerLeft.stop();
-                mediaPlayerLeft = null;
+            if (mediaPlayer != null && mediaPlayer.isPlaying()){
+                mediaPlayer.stop();
+                mediaPlayer = null;
+            }
+            if (mTimer != null) {
+                mTimer.cancel();
+                mTimer = null;
             }
             // read file
             InputStream musicStream = new FileInputStream(outputTestPath);
@@ -701,7 +736,7 @@ public class MusicActivity extends AppCompatActivity {
             vocalStream.read(vocal);
 
             // mix vocal & music, ignore 44 bytes header
-            for (int i = 44; i < music.length; i += 2){
+            for (int i = 44; i < vocal.length; i += 2){
                 // convert byte to short (16 bits)
                 float sampleMusic = (music[i] & 0xFF | music[i+1] << 8) / 32768.0f;
                 float sampleVocal = (vocal[i] & 0xFF | vocal[i+1] << 8) / 32768.0f;
@@ -717,8 +752,8 @@ public class MusicActivity extends AppCompatActivity {
                     mix = -1.0f;
                 // save byte
                 short output = (short)(mix * 32768.0f);
-                music[i] = (byte)(output & 0xFF);
-                music[i+1] = (byte)(output >> 8);
+                vocal[i] = (byte)(output & 0xFF);
+                vocal[i+1] = (byte)(output >> 8);
             }
             musicStream.close();
             vocalStream.close();
@@ -726,19 +761,21 @@ public class MusicActivity extends AppCompatActivity {
             // save
             FileOutputStream output = new FileOutputStream(outputRecordPath);
             // write wav header
-            writeWavHeader(output, music.length);
+            writeWavHeader(output, vocal.length);
 
             // write wav data
-            output.write(music, 44, music.length-44);
+            output.write(vocal, 44, vocal.length-44);
 
             output.close();
             Toast.makeText(this, "File Saved", Toast.LENGTH_SHORT).show();
             findViewById(R.id.upload).setVisibility(View.VISIBLE);
+            findViewById(R.id.restart).setEnabled(true);
         }
     }
 
     public void upload(View view) {
         findViewById(R.id.upload).setEnabled(false);
+        findViewById(R.id.restart).setEnabled(false);
         progressDialog = ProgressDialog.show(this, "Please wait", "Uploading...", true, true);
         new UploadRecordTask().execute("http://140.116.245.248:5000", musicName, artistName, server, String.valueOf(port), username, password, String.valueOf(UID), outputRecordPath);
     }
@@ -748,6 +785,7 @@ public class MusicActivity extends AppCompatActivity {
         if (removeVocalState == true){
             removeVocalState = false;
             mediaPlayer.setVolume(0.0f, 0.0f);
+            mediaPlayerOrigin.setVolume(1.0f, 1.0f);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 mediaPlayerOrigin.seekTo(mediaPlayer.getCurrentPosition(), MediaPlayer.SEEK_CLOSEST);
             }
@@ -757,6 +795,7 @@ public class MusicActivity extends AppCompatActivity {
         else{
             removeVocalState = true;
             mediaPlayer.setVolume(1.0f, 1.0f);
+            mediaPlayerOrigin.setVolume(0.0f, 0.0f);
             mediaPlayerOrigin.pause();
             ((Button) findViewById(R.id.switchVersion)).setText("Origin");
         }
@@ -767,11 +806,23 @@ public class MusicActivity extends AppCompatActivity {
         super.onDestroy();
         File test = new File(outputTestPath);
         File tmp = new File(outputTmpPath);
+        File music = new File(outputMusicPath);
+        File origin = new File(outputOriginPath);
+        File lyric = new File(outputLyricPath);
         if (tmp.exists() == true){
             tmp.delete();
         }
         if (test.exists() == true){
             test.delete();
+        }
+        if (origin.exists() == true){
+            origin.delete();
+        }
+        if (music.exists() == true){
+            music.delete();
+        }
+        if (lyric.exists() == true){
+            lyric.delete();
         }
     }
 
@@ -796,7 +847,6 @@ public class MusicActivity extends AppCompatActivity {
         return "";
     }
 
-
     /**定時task**/
     class LrcTask extends TimerTask{
         @Override
@@ -808,7 +858,62 @@ public class MusicActivity extends AppCompatActivity {
                     mLrcView.seekLrcToTime(timePassed);
                 }
             });
-
         }
     };
+
+    // update current time
+    class TimeTask extends TimerTask{
+        @Override
+        public void run() {
+            final int timePassed = mediaPlayer.getCurrentPosition();
+            final int totalTime = mediaPlayer.getDuration();
+            MusicActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    int min = timePassed / 60000;
+                    String minStr = String.valueOf(min);
+                    if (min < 10)
+                        minStr = "0" + minStr;
+                    int sec = (timePassed / 1000) % 60;
+                    String secStr = String.valueOf(sec);
+                    if (sec < 10)
+                        secStr = "0" + secStr;
+                    ((TextView)findViewById(R.id.currentTime)).setText(minStr + ":" + secStr);
+                    ((ProgressBar)findViewById(R.id.timeBar)).setProgress((int)(timePassed * 100.0f / totalTime));
+                }
+            });
+        }
+    }
+
+    public void restart(View view){
+        restartFlag = true;
+        // restart if in record state
+        if (findViewById(R.id.listen).getVisibility() == View.INVISIBLE) {
+            stopRecord(view);
+        }
+        // restart if in listen state
+        else {
+            // adjust UI
+            // hide record related buttons
+            findViewById(R.id.listen).setVisibility(View.INVISIBLE);
+            findViewById(R.id.text_music).setVisibility(View.INVISIBLE);
+            findViewById(R.id.text_vocal).setVisibility(View.INVISIBLE);
+            findViewById(R.id.seekBar_music).setVisibility(View.INVISIBLE);
+            findViewById(R.id.seekBar_vocal).setVisibility(View.INVISIBLE);
+            findViewById(R.id.music_value).setVisibility(View.INVISIBLE);
+            findViewById(R.id.vocal_value).setVisibility(View.INVISIBLE);
+            findViewById(R.id.adjust).setVisibility(View.INVISIBLE);
+            findViewById(R.id.save).setVisibility(View.INVISIBLE);
+            findViewById(R.id.upload).setVisibility(View.INVISIBLE);
+            findViewById(R.id.switchVersion).setVisibility(View.VISIBLE);
+            findViewById(R.id.key_decrease).setVisibility(View.VISIBLE);
+            findViewById(R.id.key_increase).setVisibility(View.VISIBLE);
+            findViewById(R.id.stop).setVisibility(View.VISIBLE);
+            try {
+                save(view);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            handler.sendEmptyMessage(R.integer.Record_Done);
+        }
+    }
 }

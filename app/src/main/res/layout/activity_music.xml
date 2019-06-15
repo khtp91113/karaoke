@@ -67,7 +67,7 @@
         android:layout_marginBottom="8dp"
         android:onClick="show_adjust"
         android:text="adjust"
-        app:layout_constraintBottom_toTopOf="@+id/upload"
+        app:layout_constraintBottom_toTopOf="@+id/restart"
         app:layout_constraintEnd_toStartOf="@+id/save"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toEndOf="@+id/listen" />
@@ -76,13 +76,17 @@
         android:id="@+id/seekBar_music"
         android:layout_width="149dp"
         android:layout_height="47dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:max="100"
         android:min="0"
         android:progress="50"
         app:layout_constraintBottom_toTopOf="@+id/adjust"
-        app:layout_constraintEnd_toEndOf="@+id/seekBar_vocal"
-        app:layout_constraintStart_toStartOf="@+id/seekBar_vocal" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <SeekBar
         android:id="@+id/seekBar_vocal"
@@ -90,12 +94,15 @@
         android:layout_height="51dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:max="100"
         android:min="0"
         android:progress="50"
         app:layout_constraintBottom_toTopOf="@+id/seekBar_music"
-        app:layout_constraintStart_toEndOf="@+id/text_vocal" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/text_music"
@@ -106,9 +113,7 @@
         android:layout_marginRight="8dp"
         android:text="Music"
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_music"
-        app:layout_constraintEnd_toEndOf="@+id/text_vocal"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/text_vocal"
+        app:layout_constraintEnd_toStartOf="@+id/seekBar_music"
         app:layout_constraintTop_toTopOf="@+id/seekBar_music"
         app:layout_constraintVertical_bias="0.142" />
 
@@ -116,11 +121,11 @@
         android:id="@+id/text_vocal"
         android:layout_width="43dp"
         android:layout_height="25dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:text="Vocal"
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_vocal"
-        app:layout_constraintStart_toEndOf="@+id/key_decrease"
+        app:layout_constraintEnd_toStartOf="@+id/seekBar_vocal"
         app:layout_constraintTop_toTopOf="@+id/seekBar_vocal" />
 
     <Button
@@ -181,5 +186,68 @@
         android:text="Origin"
         app:layout_constraintBottom_toTopOf="@+id/key_decrease"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/timeBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="250dp"
+        android:layout_height="17dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:min="0"
+        android:max="100"
+        app:layout_constraintBottom_toTopOf="@+id/switchVersion"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/currentTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/timeBar"
+        app:layout_constraintEnd_toStartOf="@+id/timeBar"
+        app:layout_constraintTop_toTopOf="@+id/timeBar" />
+
+    <TextView
+        android:id="@+id/endTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/timeBar"
+        app:layout_constraintStart_toEndOf="@+id/timeBar"
+        app:layout_constraintTop_toTopOf="@+id/timeBar" />
+
+    <Button
+        android:id="@+id/stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:onClick="stopRecord"
+        android:text="STOP"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/restart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:onClick="restart"
+        android:text="restart"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/upload"
+        app:layout_constraintStart_toEndOf="@+id/stop" />
 
 </android.support.constraint.ConstraintLayout>
