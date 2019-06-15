@@ -22,12 +22,13 @@ public class UploadRecordTask extends AsyncTask<String, Void, Void> {
     protected Void doInBackground(String... strings) {
         String httpServer = strings[0];
         String musicName = strings[1];
-        String ftpServer = strings[2];
-        String port = strings[3];
-        String username = strings[4];
-        String password = strings[5];
-        String UID = strings[6];
-        String outputRecordPath = strings[7];
+        String artistName = strings[2];
+        String ftpServer = strings[3];
+        String port = strings[4];
+        String username = strings[5];
+        String password = strings[6];
+        String UID = strings[7];
+        String outputRecordPath = strings[8];
 
         String path;
         Handler handler = MusicActivity.handler;
@@ -89,7 +90,7 @@ public class UploadRecordTask extends AsyncTask<String, Void, Void> {
                     ftp.changeWorkingDirectory(path);
                 }
                 FileInputStream inputRecord = new FileInputStream(outputRecordPath);
-                String songPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
+                String songPath = new String((artistName + "-" + musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
                 ftp.storeFile(songPath, inputRecord);
                 inputRecord.close();
                 ftp.logout();

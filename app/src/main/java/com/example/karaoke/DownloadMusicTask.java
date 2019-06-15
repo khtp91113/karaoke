@@ -25,18 +25,19 @@ public class DownloadMusicTask extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... strings) {
         String httpServer = strings[0];
         String musicName = strings[1];
-        String ftpServer = strings[2];
-        String port = strings[3];
-        String username = strings[4];
-        String password = strings[5];
-        String outputMusicPath = strings[6];
-        String outputOriginPath = strings[7];
-        String outputLyricPath = strings[8];
+        String artistName = strings[2];
+        String ftpServer = strings[3];
+        String port = strings[4];
+        String username = strings[5];
+        String password = strings[6];
+        String outputMusicPath = strings[7];
+        String outputOriginPath = strings[8];
+        String outputLyricPath = strings[9];
 
         Handler handler = MusicActivity.handler;
         String[] paths = new String[3];
         try {
-            String param = "MusicName=" + strings[1];
+            String param = "MusicName=" + musicName;
             URL url = new URL(httpServer + "/QuerySong");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
@@ -101,20 +102,20 @@ public class DownloadMusicTask extends AsyncTask<String, Void, String> {
                 // switch to removeVocal folder
                 ftp.changeWorkingDirectory(paths[0]);
                 FileOutputStream outputMusic = new FileOutputStream(outputMusicPath);
-                String songPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
+                String songPath = new String((artistName + "-" + musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
                 ftp.retrieveFile(songPath, outputMusic);
                 outputMusic.close();
                 // switch to Music folder
                 ftp.changeWorkingDirectory(paths[1]);
                 FileOutputStream outputOrigin = new FileOutputStream(outputOriginPath);
-                String originPath = new String((musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
+                String originPath = new String((artistName + "-" + musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
                 ftp.retrieveFile(originPath, outputOrigin);
                 outputMusic.close();
                 // switch to lyric folder
                 ftp.changeToParentDirectory();
                 ftp.changeWorkingDirectory(paths[2]);
                 FileOutputStream outputLyric = new FileOutputStream(outputLyricPath);
-                String lyricPath = new String((musicName + ".lrc").getBytes("utf-8"), "iso-8859-1");
+                String lyricPath = new String((artistName + "-" + musicName + ".lrc").getBytes("utf-8"), "iso-8859-1");
                 ftp.retrieveFile(lyricPath, outputLyric);
                 outputLyric.close();
                 ftp.logout();

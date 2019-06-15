@@ -77,6 +77,7 @@ public class MusicActivity extends AppCompatActivity {
     private int port = 21;
 
     private String musicName = "";
+    private String artistName = "";
     private int UID;
 
     private AlertDialog dialog = null;
@@ -228,7 +229,8 @@ public class MusicActivity extends AppCompatActivity {
         outputOriginPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/origin.wav";
         outputTmpPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tmp.wav";
         //TODO get musicName, UID from intent
-        musicName = "五月天-洋蔥";
+        musicName = "乾杯";
+        artistName = "五月天";
         UID = 21; // test account
         try {
             Thread.sleep(1000);
@@ -302,7 +304,7 @@ public class MusicActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Downloading...", true, true);
-                    new DownloadMusicTask().execute("http://140.116.245.248:5000", musicName, server, String.valueOf(port), username, password, outputMusicPath, outputOriginPath, outputLyricPath);
+                    new DownloadMusicTask().execute("http://140.116.245.248:5000", musicName, artistName, server, String.valueOf(port), username, password, outputMusicPath, outputOriginPath, outputLyricPath);
                 }
             });
             builder.setNegativeButton("Go back", new DialogInterface.OnClickListener() {
@@ -316,7 +318,7 @@ public class MusicActivity extends AppCompatActivity {
         }
         else{
             progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Downloading...", true, true);
-            new DownloadMusicTask().execute("http://140.116.245.248:5000", musicName, server, String.valueOf(port), username, password, outputMusicPath, outputOriginPath, outputLyricPath);
+            new DownloadMusicTask().execute("http://140.116.245.248:5000", musicName, artistName, server, String.valueOf(port), username, password, outputMusicPath, outputOriginPath, outputLyricPath);
         }
     }
 
@@ -738,7 +740,7 @@ public class MusicActivity extends AppCompatActivity {
     public void upload(View view) {
         findViewById(R.id.upload).setEnabled(false);
         progressDialog = ProgressDialog.show(this, "Please wait", "Uploading...", true, true);
-        new UploadRecordTask().execute("http://140.116.245.248:5000", musicName, server, String.valueOf(port), username, password, String.valueOf(UID), outputRecordPath);
+        new UploadRecordTask().execute("http://140.116.245.248:5000", musicName, artistName, server, String.valueOf(port), username, password, String.valueOf(UID), outputRecordPath);
     }
 
     // switch origin song or remove vocal version
