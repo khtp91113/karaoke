@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,11 +38,15 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.example.karaoke.soundtouch.SoundTouch;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 
 public class MusicActivity extends AppCompatActivity {
 
@@ -63,6 +69,7 @@ public class MusicActivity extends AppCompatActivity {
     private String outputTestPath;
     private String outputLyricPath;
     private String outputOriginPath;
+    private String outputTmpPath;
 
     private String username = "ftpuser";
     private String password = "12345678";
@@ -152,13 +159,13 @@ public class MusicActivity extends AppCompatActivity {
             public void handleMessage(Message message){
                 // show listen button, hide key increase & decrease button
                 if (message.what == R.integer.SHOW_LISTEN_BUTTON){
-                    /*if (progressDialog != null) {
+                    if (progressDialog != null) {
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 progressDialog.dismiss();
                             }
                         });
-                    }*/
+                    }
                     findViewById(R.id.listen).setVisibility(View.VISIBLE);
                     findViewById(R.id.adjust).setVisibility(View.VISIBLE);
                     findViewById(R.id.save).setVisibility(View.VISIBLE);
@@ -194,15 +201,32 @@ public class MusicActivity extends AppCompatActivity {
                         });
                     }
                 }
+                else if(message.what == R.integer.Record_Done){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Dealing record...", true, true);
+                        }
+                    });
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            try {
+                                dealRecord();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+                }
             }
         };
 
         outputMusicPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/music.mp3";
         outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/record.wav";
         outputTestPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/test.wav";
-        //TODO yun-tin please handle XD
         outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/lyric.lrc";
         outputOriginPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/origin.wav";
+        outputTmpPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tmp.wav";
         //TODO get musicName, UID from intent
         musicName = "五月天-洋蔥";
         UID = 21; // test account
@@ -322,7 +346,7 @@ public class MusicActivity extends AppCompatActivity {
             @Override
             public void run(){
                 try {
-                    record(outputRecordPath);
+                    record();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -522,70 +546,71 @@ public class MusicActivity extends AppCompatActivity {
         output.write(subChunk2Size);
     }
 
-    private void record(String outputPath) throws IOException {
+    private void record() throws IOException {
 
+        FileOutputStream tmpOutput = new FileOutputStream(outputTmpPath);
         int minSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-        AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100,  AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize);
+        AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize);
 
         byte[] data = new byte[minSize];
-        List<Byte> outputList = new ArrayList<Byte>();
 
-        FileOutputStream output = new FileOutputStream(outputPath);
-        mediaPlayerOrigin.setVolume(0.0f, 0.0f);
+        mediaPlayerOrigin.setVolume(1.0f, 1.0f);
 
         mediaPlayer.start();
         audioRecord.startRecording();
-        mediaPlayerOrigin.start();
 
         /**lyric scrolling*/
-        if(mTimer == null){
+        if (mTimer == null) {
             mTimer = new Timer();
             mTask = new LrcTask();
             mTimer.scheduleAtFixedRate(mTask, 0, mPlayerTimerDuration);
         }
-        while(mediaPlayer.isPlaying()){
+        while (mediaPlayer.isPlaying()) {
             int size = audioRecord.read(data, 0, minSize);
-            if (size != AudioRecord.ERROR_INVALID_OPERATION){
-                for (byte b: data)
-                    outputList.add(b);
+            if (size != AudioRecord.ERROR_INVALID_OPERATION) {
+                tmpOutput.write(data, 0, size);
             }
         }
         audioRecord.stop();
         audioRecord.release();
 
-        //progressDialog = ProgressDialog.show(MusicActivity.this, "Please wait", "Dealing audio...", true, true);
-        outputList = adjustRecordLength(outputList);
+        tmpOutput.close();
+        handler.sendEmptyMessage(R.integer.Record_Done);
+    }
 
-        writeWavHeader(output, outputList.size());
+    public void dealRecord() throws IOException {
+        InputStream tmpInput = new FileInputStream(outputTmpPath);
+        byte[] data = new byte[tmpInput.available()];
+        tmpInput.read(data);
+        tmpInput.close();
 
-        Byte[] soundBytes = outputList.toArray(new Byte[outputList.size()]);
-        byte[] outputSound = new byte[soundBytes.length];
-        int j = 0;
-        for(Byte b: soundBytes)
-            outputSound[j++] = b.byteValue();
-        // write wav data
-        output.write(outputSound);
+        FileOutputStream output = new FileOutputStream(outputTmpPath);
+        data = adjustRecordLength(data);
+
+        writeWavHeader(output, data.length);
+
+        output.write(data);
         output.close();
 
-        //outputList.clear();
         modifyPitch();
 
         // show listen button
         handler.sendEmptyMessage(R.integer.SHOW_LISTEN_BUTTON);
     }
 
-    public List<Byte> adjustRecordLength(List<Byte> outputList) throws IOException {
+    public byte[] adjustRecordLength(byte[] data) throws IOException {
         // read music size
         InputStream musicStream = new FileInputStream(outputMusicPath);
         byte[] music = new byte[musicStream.available()];
         musicStream.read(music);
         musicStream.close();
+
         int musicDataSize = music.length - 44;
-        int recordDataSize = outputList.size();
+        int recordDataSize = data.length;
         if (recordDataSize > musicDataSize){
-            outputList.subList(0, recordDataSize-musicDataSize).clear();
+            return Arrays.copyOfRange(data, recordDataSize-musicDataSize, recordDataSize);
         }
-        return outputList;
+        return data;
     }
 
     // modify music pitch for mix record
@@ -600,7 +625,7 @@ public class MusicActivity extends AppCompatActivity {
         if (mediaPlayerLeft == null && mediaPlayerRight == null){
             // open music & record file and play
             File fileMusic = new File(outputTestPath);
-            File fileRecord = new File(outputRecordPath);
+            File fileRecord = new File(outputTmpPath);
             Uri musicUri = Uri.fromFile(fileMusic);
             Uri recordUri = Uri.fromFile(fileRecord);
             mediaPlayerLeft = MediaPlayer.create(getApplicationContext(), musicUri);
@@ -663,7 +688,7 @@ public class MusicActivity extends AppCompatActivity {
             }
             // read file
             InputStream musicStream = new FileInputStream(outputTestPath);
-            InputStream vocalStream = new FileInputStream(outputRecordPath);
+            InputStream vocalStream = new FileInputStream(outputTmpPath);
 
             ////// For test //////
             //InputStream vocalStream = getResources().openRawResource(R.raw.onion_mayday_cut_wav);
@@ -721,13 +746,16 @@ public class MusicActivity extends AppCompatActivity {
         if (removeVocalState == true){
             removeVocalState = false;
             mediaPlayer.setVolume(0.0f, 0.0f);
-            mediaPlayerOrigin.setVolume(1.0f, 1.0f);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mediaPlayerOrigin.seekTo(mediaPlayer.getCurrentPosition(), MediaPlayer.SEEK_CLOSEST);
+            }
+            mediaPlayerOrigin.start();
             ((Button) findViewById(R.id.switchVersion)).setText("Remove vocal");
         }
         else{
             removeVocalState = true;
             mediaPlayer.setVolume(1.0f, 1.0f);
-            mediaPlayerOrigin.setVolume(0.0f, 0.0f);
+            mediaPlayerOrigin.pause();
             ((Button) findViewById(R.id.switchVersion)).setText("Origin");
         }
     }
@@ -735,9 +763,13 @@ public class MusicActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        File f = new File(outputTestPath);
-        if (f.exists() == true){
-            f.delete();
+        File test = new File(outputTestPath);
+        File tmp = new File(outputTmpPath);
+        if (tmp.exists() == true){
+            tmp.delete();
+        }
+        if (test.exists() == true){
+            test.delete();
         }
     }
 

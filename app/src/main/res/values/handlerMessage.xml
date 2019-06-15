@@ -4,5 +4,6 @@
     <integer name="CANT_CONNECT_HTTP_SERVER">1</integer>
     <integer name="CANT_CONNECT_FTP_SERVER">2</integer>
     <integer name="Download_Done">3</integer>
-    <integer name="Upload_Done">3</integer>
+    <integer name="Upload_Done">4</integer>
+    <integer name="Record_Done">5</integer>
 </resources>
