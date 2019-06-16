@@ -15,6 +15,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ChangePasswordActivity"></activity>
+        <activity android:name=".RegisterActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SongListActivity"
+            android:label="@string/title_activity_sonlist"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".PersonalDetailActivity"
             android:label="@string/title_activity_personal_detail"
@@ -24,17 +34,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.karaoke.MainActivity" />
         </activity>
-        <activity android:name=".MusicActivity">
+        <activity android:name=".MusicActivity" />
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity">
-
-        </activity>
-
     </application>
 
 </manifest>

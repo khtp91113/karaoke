@@ -2,6 +2,7 @@ package com.example.karaoke;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -9,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongListHolder>  {
     private final SongListActivity.SongObject[] songs;
@@ -65,7 +68,9 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongLi
             Intent intent = new Intent(v.getContext(),MusicActivity.class);
             intent.putExtra("MusicName",songName);
             intent.putExtra("ArtistName",artist);
-            intent.putExtra("UID",UID);
+            SharedPreferences pref = v.getContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+            int UIDD=pref.getInt("UID", 0);
+            intent.putExtra("UID",UIDD);
             v.getContext().startActivity(intent);
         }
     }
