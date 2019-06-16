@@ -74,4 +74,13 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="switchVersion_detail">切換去人聲版或是原唱</string>
+    <string name="key_decrease_detail">降半音</string>
+    <string name="key_increase_detail">升半音</string>
+    <string name="listen_detail">播放錄音檔和音樂</string>
+    <string name="adjust_detail">調整錄音檔和背景音樂的聲音</string>
+    <string name="save_detail">存檔</string>
+    <string name="stop_detail">停止錄音</string>
+    <string name="restart_detail">重唱這首歌</string>
+    <string name="upload_detail">上傳錄音檔到伺服器</string>
 </resources>

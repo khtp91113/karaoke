@@ -19,19 +19,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/key_decrease"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginBottom="8dp"
-        android:onClick="keyDecrease"
-        android:text="key--"
-        app:layout_constraintBottom_toTopOf="@+id/adjust"
-        app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
+    <ImageButton
         android:id="@+id/key_increase"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -39,24 +28,54 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="keyIncrease"
-        android:text="key++"
+        app:srcCompat="@mipmap/key_increase"
+        android:background = "@drawable/roundbutton"
         app:layout_constraintBottom_toBottomOf="@+id/key_decrease"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/key_decrease" />
 
-    <Button
+    <ImageButton
+        android:id="@+id/key_decrease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:onClick="keyDecrease"
+        app:srcCompat="@mipmap/key_decrease"
+        android:background = "@drawable/roundbutton"
+        app:layout_constraintBottom_toTopOf="@+id/adjust"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteX="23dp"
+        tools:layout_editor_absoluteY="354dp" />
+
+    <ImageButton
+        android:id="@+id/switchVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/roundbutton"
+        android:onClick="switchSong"
+        app:layout_constraintBottom_toTopOf="@+id/key_decrease"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@mipmap/origin" />
+
+    <ImageButton
         android:id="@+id/listen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:onClick="listen_record"
-        android:text="Listen"
+        app:srcCompat="@mipmap/listen"
+        android:background = "@drawable/roundbutton"
         app:layout_constraintBottom_toBottomOf="@+id/adjust"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/adjust" />
 
-    <Button
+    <ImageButton
         android:id="@+id/adjust"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -66,7 +85,8 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="show_adjust"
-        android:text="adjust"
+        app:srcCompat="@mipmap/adjust"
+        android:background = "@drawable/roundbutton"
         app:layout_constraintBottom_toTopOf="@+id/restart"
         app:layout_constraintEnd_toStartOf="@+id/save"
         app:layout_constraintHorizontal_bias="0.495"
@@ -128,19 +148,20 @@
         app:layout_constraintEnd_toStartOf="@+id/seekBar_vocal"
         app:layout_constraintTop_toTopOf="@+id/seekBar_vocal" />
 
-    <Button
+    <ImageButton
         android:id="@+id/save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:onClick="save"
-        android:text="save"
+        app:srcCompat="@mipmap/save"
+        android:background = "@drawable/roundbutton"
         app:layout_constraintBottom_toBottomOf="@+id/adjust"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/adjust" />
 
-    <Button
+    <ImageButton
         android:id="@+id/upload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -148,7 +169,8 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="upload"
-        android:text="upload"
+        app:srcCompat="@mipmap/upload"
+        android:background = "@drawable/roundbutton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -174,18 +196,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_music"
         app:layout_constraintStart_toEndOf="@+id/seekBar_music"
         app:layout_constraintTop_toTopOf="@+id/seekBar_music" />
-
-    <Button
-        android:id="@+id/switchVersion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginBottom="8dp"
-        android:onClick="switchSong"
-        android:text="Origin"
-        app:layout_constraintBottom_toTopOf="@+id/key_decrease"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <ProgressBar
         android:id="@+id/timeBar"
@@ -223,7 +233,7 @@
         app:layout_constraintStart_toEndOf="@+id/timeBar"
         app:layout_constraintTop_toTopOf="@+id/timeBar" />
 
-    <Button
+    <ImageButton
         android:id="@+id/stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -231,11 +241,12 @@
         android:layout_marginLeft="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="stopRecord"
-        android:text="STOP"
+        app:srcCompat="@mipmap/stop"
+        android:background = "@drawable/roundbutton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
+    <ImageButton
         android:id="@+id/restart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -245,9 +256,13 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="restart"
-        android:text="restart"
+        app:srcCompat="@mipmap/restart"
+        android:background = "@drawable/roundbutton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/upload"
         app:layout_constraintStart_toEndOf="@+id/stop" />
+
+
+
 
 </android.support.constraint.ConstraintLayout>
