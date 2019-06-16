@@ -18,7 +18,7 @@ public class LyricBuilder {
     public List<LyricRow> getLrcRows(String rawLrc){
         if (rawLrc == null || rawLrc.length() == 0) return null;
 
-
+        boolean firstline=true;
         StringReader reader = new StringReader(rawLrc);
         BufferedReader br = new BufferedReader(reader);
         String line = null;
@@ -33,16 +33,28 @@ public class LyricBuilder {
 
                     try {
 
-                        //從"]"，拆成前後兩段
-                        String content = line.substring(10);
-                        String times = line.substring(0, 10).replace("[", "").replace("]", "");
+                        if(firstline) {
+                            String content = line.substring(11);
+                            //     Log.i("LRC1",line);
+                            //     Log.i("LRC",content);
+                            LyricRow lrcRow = new LyricRow();
+                            lrcRow.setContent(content);
+                            long startTime =0;
+                            lrcRow.setStartTime(startTime);
+                            lrcRows.add(lrcRow);
+                            firstline=false;
+                        }
+                        else {
+                            //從"]"，拆成前後兩段
+                            String content = line.substring(10);
+                            String times = line.substring(0, 10).replace("[", "").replace("]", "");
 
-                        LyricRow lrcRow = new LyricRow();
-                        lrcRow.setContent(content);
-                        long startTime = timeConvert(times);
-                        lrcRow.setStartTime(startTime);
-                        lrcRows.add(lrcRow);
-
+                            LyricRow lrcRow = new LyricRow();
+                            lrcRow.setContent(content);
+                            long startTime = timeConvert(times);
+                            lrcRow.setStartTime(startTime);
+                            lrcRows.add(lrcRow);
+                        }
 
                     } catch (Exception e) {
 
