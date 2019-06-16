@@ -42,5 +42,5 @@ public class MainActivity extends AppCompatActivity {
 
         view.getContext().startActivity(intent,options.toBundle());
     }
-    
+
 }
