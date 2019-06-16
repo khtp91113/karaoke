@@ -21,8 +21,19 @@
     <string-array name="leaderboard">
         <item>中</item>
         <item>英</item>
-        <item>經典</item>
+        <item>粵</item>
+        <item>台</item>
+        <item>其他</item>
     </string-array>
-
+    <string-array name="apis">
+        <item>QuerySongListByLanguage</item>
+        <item>QuerySongListByGender</item>
+        <item>QuerySongListByCount</item>
+    </string-array>
+    <string-array name="apis_para_key">
+        <item>Language</item>
+        <item>Gender</item>
+        <item>Language</item>
+    </string-array>
 
 </resources>

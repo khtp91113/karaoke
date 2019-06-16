@@ -242,9 +242,10 @@ public class MusicActivity extends AppCompatActivity {
             }
         };
 
-        musicName = "洋蔥";
-        artistName = "五月天";
-        UID = 21; // test account
+        Intent intent = getIntent();
+        musicName = intent.getStringExtra("MusicName");
+        artistName = intent.getStringExtra("ArtistName");
+        UID = intent.getIntExtra("UID", 21);
 
         File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke");
         if (!dir.exists()) {
