@@ -13,14 +13,18 @@ import java.util.LinkedList;
 public class SongGroupAdapter extends
         RecyclerView.Adapter<SongGroupAdapter.SongGroupHolder>  {
     private final String[] mSongGroupList;
+    private final String[] mApis;
+    private final String[] mKeys;
     private final String[][] mGroupContent;
     private final LayoutInflater mInflater;
     private Context context;
-    public SongGroupAdapter(Context context, String[] songGroupList,String[][] content) {
+    public SongGroupAdapter(Context context, String[] songGroupList,String[][] content,String[] apis, String[] parakeys) {
         mInflater = LayoutInflater.from(context);
         this.mSongGroupList = songGroupList;
         this.mGroupContent = content;
         this.context = context;
+        this.mApis = apis;
+        this.mKeys = parakeys;
     }
 
     @Override
@@ -38,7 +42,7 @@ public class SongGroupAdapter extends
         String mCurrent = mSongGroupList[i];
         // Add the data to the view holder.
         holder.titleView.setText(mCurrent);
-        SongGroupContentAdapter mAdapter = new SongGroupContentAdapter(context,mGroupContent[i]);
+        SongGroupContentAdapter mAdapter = new SongGroupContentAdapter(context,mGroupContent[i],mApis[i],mKeys[i]);
         holder.recyclerView.setAdapter(mAdapter);
         holder.recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false));
     }

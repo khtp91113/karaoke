@@ -25,8 +25,10 @@ public class MainActivity extends AppCompatActivity {
         content[0] = getResources().getStringArray(R.array.languages);
         content[1] = getResources().getStringArray(R.array.singer);
         content[2] = getResources().getStringArray(R.array.leaderboard);
+        String[] apis = getResources().getStringArray(R.array.apis);
+        String[] keys = getResources().getStringArray(R.array.apis_para_key);
         mRecyclerView = findViewById(R.id.recyclerView);
-        mAdapter = new SongGroupAdapter(this,categories,content);
+        mAdapter = new SongGroupAdapter(this,categories,content,apis,keys);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
 }
