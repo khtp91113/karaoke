@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaPlayer;
@@ -20,8 +22,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -49,7 +57,6 @@ public class MusicActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayerOrigin = null;
     private boolean removeVocalState = true;
 
-    //private MediaPlayer mediaPlayerLeft = null;
     private MediaPlayer mediaPlayerRight = null;
     private float pitch;
     private int pitchState;
@@ -79,6 +86,8 @@ public class MusicActivity extends AppCompatActivity {
     private AlertDialog dialog = null;
     private ProgressDialog progressDialog = null;
     private boolean restartFlag = false;
+    private PopupWindow popup;
+    private boolean longPressFlag = false;
 
     String[] permissions = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO};
     private int ALL_PERMISSION = 101;
@@ -151,6 +160,9 @@ public class MusicActivity extends AppCompatActivity {
         findViewById(R.id.adjust).setVisibility(View.INVISIBLE);
         findViewById(R.id.save).setVisibility(View.INVISIBLE);
         findViewById(R.id.upload).setVisibility(View.INVISIBLE);
+
+        // set button long press listener
+        setLongPress();
 
         handler = new Handler(){
             @Override
@@ -230,9 +242,10 @@ public class MusicActivity extends AppCompatActivity {
             }
         };
 
-        musicName = "洋蔥";
-        artistName = "五月天";
-        UID = 21; // test account
+        Intent intent = getIntent();
+        musicName = intent.getStringExtra("MusicName");
+        artistName = intent.getStringExtra("ArtistName");
+        UID = intent.getIntExtra("UID", 21);
 
         File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke");
         if (!dir.exists()) {
@@ -256,6 +269,76 @@ public class MusicActivity extends AppCompatActivity {
         timeBar = findViewById(R.id.timeBar);
         // check internet status and hint
         checkInternet();
+    }
+
+    public void setLongPress(){
+        int[] buttonList = {R.id.switchVersion, R.id.key_decrease, R.id.key_increase, R.id.listen, R.id.adjust, R.id.save, R.id.stop, R.id.restart, R.id.upload};
+        for (int i = 0; i < buttonList.length; i++){
+            findViewById(buttonList[i]).setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    longPressFlag = true;
+                    popUpDetail(v);
+                    return true;
+                }
+            });
+            findViewById(buttonList[i]).setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        if (longPressFlag) {
+                            if (popup != null)
+                                popup.dismiss();
+                            longPressFlag = false;
+                        }
+                    }
+                    return false;
+                }
+            });
+        }
+    }
+
+    public void popUpDetail(View v){
+        View layout = LayoutInflater.from(this).inflate(R.layout.popup_content, null);
+        popup = new PopupWindow(this);
+        popup.setContentView(layout);
+        int buttonClickID = v.getId();
+        if (buttonClickID == R.id.switchVersion){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.switchVersion_detail);
+        }
+        else if (buttonClickID == R.id.key_decrease){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.key_decrease_detail);
+        }
+        else if (buttonClickID == R.id.key_increase){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.key_increase_detail);
+        }
+        else if (buttonClickID == R.id.listen){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.listen_detail);
+        }
+        else if (buttonClickID == R.id.adjust){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.adjust_detail);
+        }
+        else if (buttonClickID == R.id.save){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.save_detail);
+        }
+        else if (buttonClickID == R.id.stop){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.stop_detail);
+        }
+        else if (buttonClickID == R.id.restart){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.restart_detail);
+        }
+        else if (buttonClickID == R.id.upload){
+            ((TextView)(layout.findViewById(R.id.detail))).setText(R.string.upload_detail);
+        }
+
+        // Set content width and height
+        layout.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        popup.setHeight(layout.getMeasuredHeight());
+        popup.setWidth(layout.getMeasuredWidth());
+
+        // Show anchored to button
+        popup.setBackgroundDrawable(new BitmapDrawable());
+        popup.showAsDropDown(v, 0, -(layout.getMeasuredHeight() + v.getHeight() + 8));
     }
 
     public void server_disconnect_alert(String server){
@@ -343,7 +426,7 @@ public class MusicActivity extends AppCompatActivity {
 
     public void mediaPlayerSetup(){
         // reset song version button text for restart
-        ((Button)(findViewById(R.id.switchVersion))).setText("ORIGIN");
+        ((ImageButton)(findViewById(R.id.switchVersion))).setImageResource(R.mipmap.origin);
         removeVocalState = true;
         // open music file and play
         File file = new File(outputMusicPath);
@@ -790,14 +873,14 @@ public class MusicActivity extends AppCompatActivity {
                 mediaPlayerOrigin.seekTo(mediaPlayer.getCurrentPosition(), MediaPlayer.SEEK_CLOSEST);
             }
             mediaPlayerOrigin.start();
-            ((Button) findViewById(R.id.switchVersion)).setText("Remove vocal");
+            ((ImageButton)(findViewById(R.id.switchVersion))).setImageResource(R.mipmap.remove_vocal);
         }
         else{
             removeVocalState = true;
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayerOrigin.setVolume(0.0f, 0.0f);
             mediaPlayerOrigin.pause();
-            ((Button) findViewById(R.id.switchVersion)).setText("Origin");
+            ((ImageButton)(findViewById(R.id.switchVersion))).setImageResource(R.mipmap.origin);
         }
     }
 
