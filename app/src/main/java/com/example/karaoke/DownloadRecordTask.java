@@ -8,18 +8,21 @@ import android.util.Log;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPSClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class UploadRecordTask extends AsyncTask<String, Void, Void> {
+public class DownloadRecordTask extends AsyncTask<String, Void, String> {
     @Override
-    protected Void doInBackground(String... strings) {
+    protected String doInBackground(String... strings) {
         String httpServer = strings[0];
         String musicName = strings[1];
         String artistName = strings[2];
@@ -27,14 +30,15 @@ public class UploadRecordTask extends AsyncTask<String, Void, Void> {
         String port = strings[4];
         String username = strings[5];
         String password = strings[6];
-        String UID = strings[7];
-        String outputRecordPath = strings[8];
+        String outputRecordPath = strings[7];
+        String outputLyricPath = strings[8];
+        int UID = Integer.parseInt(strings[9]);
 
-        String path;
-        Handler handler = MusicActivity.handler;
+        Handler handler = ListenRecordActivity.handler;
+        String[] paths = new String[2];
         try {
             String param = "PersonalMusicName=" + artistName + "-" + musicName + "&UID=" + UID;
-            URL url = new URL(httpServer + "/UploadPersonalSong");
+            URL url = new URL(httpServer + "/QueryPersonalSong");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(5000);
@@ -53,16 +57,26 @@ public class UploadRecordTask extends AsyncTask<String, Void, Void> {
             // connect success
             if (connection.getResponseCode() == 200) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = reader.readLine();
+                StringBuffer result = new StringBuffer();
+                String line;
+                // read response
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
                 reader.close();
-                path = line;
-            }
-            else{
-                handler.sendEmptyMessage(R.integer.CANT_CONNECT_HTTP_SERVER);
-                return null;
+                // return format [ {...}, {...}, ...]
+                JSONArray arr = new JSONArray(result.toString());
+                JSONObject json = arr.getJSONObject(0);
+                paths[0] = json.getString("RecordPath");
+                paths[1] = json.getString("LyricPath");
             }
         }
         catch (IOException e){
+            Log.i("test", e.getMessage());
+            handler.sendEmptyMessage(R.integer.CANT_CONNECT_HTTP_SERVER);
+            return null;
+        }
+        catch (JSONException e){
             Log.i("test", e.getMessage());
             handler.sendEmptyMessage(R.integer.CANT_CONNECT_HTTP_SERVER);
             return null;
@@ -84,21 +98,24 @@ public class UploadRecordTask extends AsyncTask<String, Void, Void> {
                 // encrypt channel
                 ftp.execPROT("P");
                 ftp.enterLocalPassiveMode();
-                // switch to Record folder
-                if (ftp.changeWorkingDirectory(path) == false) {
-                    ftp.makeDirectory(path);
-                    ftp.changeWorkingDirectory(path);
-                }
-                FileInputStream inputRecord = new FileInputStream(outputRecordPath);
+                // switch to Record Folder
+                ftp.changeWorkingDirectory(paths[0]);
+                FileOutputStream outputRecord = new FileOutputStream(outputRecordPath);
                 String songPath = new String((artistName + "-" + musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
-                ftp.storeFile(songPath, inputRecord);
-                inputRecord.close();
+                ftp.retrieveFile(songPath, outputRecord);
+                outputRecord.close();
+                // switch to lyric folder
+                ftp.changeWorkingDirectory(paths[1]);
+                FileOutputStream outputLyric = new FileOutputStream(outputLyricPath);
+                String lyricPath = new String((artistName + "-" + musicName + ".lrc").getBytes("utf-8"), "iso-8859-1");
+                ftp.retrieveFile(lyricPath, outputLyric);
+                outputLyric.close();
                 ftp.logout();
                 ftp.disconnect();
-                handler.sendEmptyMessage(R.integer.Upload_Done);
+                handler.sendEmptyMessage(R.integer.Download_Done);
                 return null;
             }
-            else {
+            else{
                 handler.sendEmptyMessage(R.integer.CANT_CONNECT_FTP_SERVER);
                 return null;
             }

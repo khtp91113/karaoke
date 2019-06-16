@@ -24,17 +24,32 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.karaoke.MainActivity" />
         </activity>
-        <activity android:name=".MusicActivity">
-
+        <activity
+            android:name=".SongListActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.karaoke.MainActivity" />
+        </activity>
+        <activity
+            android:name=".MusicActivity"
+            android:parentActivityName=".SongListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.karaoke.SongListActivity" />
         </activity>
         <activity android:name=".MainActivity">
+
+        </activity>
+        <activity android:name=".ListenRecordActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

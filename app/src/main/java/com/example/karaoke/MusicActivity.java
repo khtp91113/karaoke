@@ -245,7 +245,8 @@ public class MusicActivity extends AppCompatActivity {
         Intent intent = getIntent();
         musicName = intent.getStringExtra("MusicName");
         artistName = intent.getStringExtra("ArtistName");
-        UID = intent.getIntExtra("UID", 21);
+        //UID = intent.getIntExtra("UID", 21);
+        UID = 21;
 
         File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke");
         if (!dir.exists()) {
@@ -891,7 +892,6 @@ public class MusicActivity extends AppCompatActivity {
         File tmp = new File(outputTmpPath);
         File music = new File(outputMusicPath);
         File origin = new File(outputOriginPath);
-        File lyric = new File(outputLyricPath);
         if (tmp.exists() == true){
             tmp.delete();
         }
@@ -903,9 +903,6 @@ public class MusicActivity extends AppCompatActivity {
         }
         if (music.exists() == true){
             music.delete();
-        }
-        if (lyric.exists() == true){
-            lyric.delete();
         }
     }
 

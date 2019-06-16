@@ -84,6 +84,8 @@
     <string name="stop_detail">停止錄音</string>
     <string name="restart_detail">重唱這首歌</string>
     <string name="upload_detail">上傳錄音檔到伺服器</string>
+    <string name="listen_upload_record_detail">播放錄音</string>
+    <string name="stop_play_record_detail">停止播放錄音</string>
 
     <string name="server_host">140.116.245.248:5000</string>
     <string name="title_activity_sonlist">SonlistActivity</string>
