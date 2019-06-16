@@ -245,8 +245,7 @@ public class MusicActivity extends AppCompatActivity {
         Intent intent = getIntent();
         musicName = intent.getStringExtra("MusicName");
         artistName = intent.getStringExtra("ArtistName");
-        //UID = intent.getIntExtra("UID", 21);
-        UID = 21;
+        UID = intent.getIntExtra("UID", 21);
 
         File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke");
         if (!dir.exists()) {

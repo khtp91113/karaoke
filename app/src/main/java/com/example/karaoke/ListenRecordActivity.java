@@ -76,12 +76,9 @@ public class ListenRecordActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, permissions, ALL_PERMISSION);
 
         Intent intent = getIntent();
-        //musicName = intent.getStringExtra("MusicName");
-        //artistName = intent.getStringExtra("ArtistName");
-        //UID = intent.getIntExtra("UID", 21);
-        musicName = "Last Christmas";
-        artistName = "Taylor Swift";
-        UID = 21;
+        musicName = intent.getStringExtra("MusicName");
+        artistName = intent.getStringExtra("ArtistName");
+        UID = intent.getIntExtra("UID", 21);
 
         File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke");
         if (!dir.exists()) {
