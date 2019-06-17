@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,7 +17,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAdapter.ViewHolder> {
@@ -73,47 +77,29 @@ public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAd
                 @Override
                 public void onClick(View v) {
                     int mPosition = getLayoutPosition();
-                    removeItem(getAdapterPosition());
-                    String queryString = "https://140.118.245.248/RemovePersonalSong?/UID="+ mUID +"&PersonalMusicName=" + mData1.get(mPosition);
+                    //local file
+                    String recordPath  = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + mArtistList.get(mPosition) + "-" + mData1.get(mPosition)  +  "_record.wav";
+                    File f = new File(recordPath);
+                    if (f.exists() == true)
+                        f.delete();
 
-
-                    // Hide the keyboard when the button is pushed.
-                    InputMethodManager inputManager = (InputMethodManager)
-                            v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (inputManager != null) {
-                        inputManager.hideSoftInputFromWindow(v.getWindowToken(),
-                                InputMethodManager.HIDE_NOT_ALWAYS);
+                    // http server ftp server
+                    try {
+                        new RemovePersonalRecordTask().execute("http://140.116.245.248:5000", mData1.get(mPosition), mArtistList.get(mPosition), "140.116.245.248", "21", "ftpuser", "12345678", String.valueOf(mUID)).get();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-
-                    // Check the status of the network connection.
-                    ConnectivityManager connMgr = (ConnectivityManager)
-                            v.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo networkInfo = null;
-                    if (connMgr != null) {
-                        networkInfo = connMgr.getActiveNetworkInfo();
-                    }
-
-                    // If the network is available, connected, and the search field
-                    // is not empty, start a BookLoader AsyncTask.
-                    if (networkInfo != null && networkInfo.isConnected()
-                            && queryString.length() != 0) {
-
-                        Bundle queryBundle = new Bundle();
-                        queryBundle.putString("queryString", queryString);
-                        //getSupportLoaderManager().restartLoader(0, queryBundle, this);
-                    }
-                    // Otherwise update the TextView to tell the user there is no
-                    // connection, or no search term.
-                    else {
-                        Toast.makeText(v.getContext(), "Check your internet connection and try again.", Toast.LENGTH_LONG).show();
-                    }
+                    removeItem();
                 }
             });
         }
     }
 
-    public void removeItem(int position){
-        mData1.remove(position);
-        notifyItemRemoved(position);
+    public void removeItem(){
+        Handler handler = PersonalRecord.handler;
+        handler.sendEmptyMessage(0);
+        return;
     }
 }

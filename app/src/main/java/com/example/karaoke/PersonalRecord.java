@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -14,6 +16,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -30,6 +33,7 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
     private ArrayList<String> Artist = new ArrayList<>();
     private ArrayList<String> MusicName = new ArrayList<>();
     private Integer UID;
+    protected static Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,16 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
         recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
         recycler_view.setLayoutManager(new LinearLayoutManager(this));
         recycler_view.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                // show listen button, hide key increase & decrease button
+                if (message.what == 0) {
+                    GetSongList();
+                }
+            }
+        };
 
         GetSongList();
         // 將資料交給adapter

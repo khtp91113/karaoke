@@ -851,7 +851,8 @@ public class MusicActivity extends AppCompatActivity {
 
             output.close();
             Toast.makeText(this, "File Saved", Toast.LENGTH_SHORT).show();
-            findViewById(R.id.upload).setVisibility(View.VISIBLE);
+            if (UID != 0)
+                findViewById(R.id.upload).setVisibility(View.VISIBLE);
             findViewById(R.id.restart).setEnabled(true);
         }
     }
