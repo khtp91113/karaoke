@@ -3,6 +3,7 @@ package com.example.karaoke;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -27,6 +28,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongLi
         // Inflate an item view.
         View mItemView = mInflater.inflate(
                 R.layout.song_item, viewGroup, false);
+
         return new SongListHolder(mItemView);
     }
 
@@ -55,11 +57,22 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongLi
         public String songName;
         public String artist;
         public int UID;
+
+        Typeface titleFont = Typeface.createFromAsset(itemView.getContext().getAssets(),"fonts/cfont.ttf");
+        Typeface artistFont = Typeface.createFromAsset(itemView.getContext().getAssets(),"fonts/cfont.ttf");
+        Typeface countFont = Typeface.createFromAsset(itemView.getContext().getAssets(),"fonts/cfont.ttf");
+
         public SongListHolder(View itemView) {
             super(itemView);
             NameView = itemView.findViewById(R.id.name);
             ArtistView = itemView.findViewById(R.id.artist);
             CountView = itemView.findViewById(R.id.count);
+
+            NameView.setTypeface(titleFont);
+            ArtistView.setTypeface(artistFont);
+            CountView.setTypeface(countFont);
+
+
             itemView.setOnClickListener(this);
         }
 

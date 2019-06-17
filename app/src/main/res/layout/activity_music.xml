@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#295b75"
+    android:background="@drawable/singbackground"
     tools:context=".MusicActivity">
 
     <com.example.karaoke.LyricView
         android:id="@+id/lrcView"
         android:layout_width="0dp"
-        android:layout_height="269dp"
+        android:layout_height="228dp"
 
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
