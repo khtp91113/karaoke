@@ -15,6 +15,6 @@
         android:id="@+id/btnRemove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/remove_button" />
+        android:text="remove_button" />
 
 </LinearLayout>

@@ -101,6 +101,7 @@ public class DownloadRecordTask extends AsyncTask<String, Void, String> {
                 // switch to Record Folder
                 ftp.changeWorkingDirectory(paths[0]);
                 FileOutputStream outputRecord = new FileOutputStream(outputRecordPath);
+                Log.i("show output", outputRecordPath);
                 String songPath = new String((artistName + "-" + musicName + ".wav").getBytes("utf-8"), "iso-8859-1");
                 ftp.retrieveFile(songPath, outputRecord);
                 outputRecord.close();

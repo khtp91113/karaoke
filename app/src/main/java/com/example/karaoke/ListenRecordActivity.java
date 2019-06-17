@@ -16,6 +16,7 @@ import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +51,7 @@ public class ListenRecordActivity extends AppCompatActivity {
     private String musicName = "";
     private String artistName = "";
     private int UID;
+    private String mode = "";
 
     private ProgressBar timeBar;
     private AlertDialog dialog = null;
@@ -79,6 +81,7 @@ public class ListenRecordActivity extends AppCompatActivity {
         musicName = intent.getStringExtra("MusicName");
         artistName = intent.getStringExtra("ArtistName");
         UID = intent.getIntExtra("UID", 21);
+        mode = intent.getStringExtra("mode");
 
         File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke");
         if (!dir.exists()) {
@@ -110,12 +113,23 @@ public class ListenRecordActivity extends AppCompatActivity {
             }
         };
         setLongPress();
-        outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_record.wav";
+
+        if (mode.equals("other")){
+            outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_tmp_record.wav";
+        }
+        else{
+            outputRecordPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_record.wav";
+        }
         outputLyricPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Karaoke/" + artistName + "-" + musicName  +  "_lyric.lrc";
         File recordFile = new File(outputRecordPath);
         File lyricFile = new File(outputLyricPath);
-        if (recordFile.exists() == false || lyricFile.exists() == false)
+        if (mode.equals("other"))
             checkInternet();
+        else{
+            if (recordFile.exists() == false || lyricFile.exists() == false)
+                checkInternet();
+        }
+
     }
 
     public void checkInternet(){
@@ -287,7 +301,7 @@ public class ListenRecordActivity extends AppCompatActivity {
     }
 
     public void stop(View stop){
-        if (mediaPlayer.isPlaying())
+        if (mediaPlayer != null && mediaPlayer.isPlaying())
             mediaPlayer.seekTo(mediaPlayer.getDuration());
     }
 
@@ -338,6 +352,17 @@ public class ListenRecordActivity extends AppCompatActivity {
                     return false;
                 }
             });
+        }
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        if (mode.equals("other")){
+            File record = new File(outputRecordPath);
+            if (record.exists() == true){
+                record.delete();
+            }
         }
     }
 }

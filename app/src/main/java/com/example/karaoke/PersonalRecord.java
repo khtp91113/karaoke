@@ -57,7 +57,7 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
             queryString = bundle.getString("queryString");
         }
 
-        return new QueryLoader (this,queryString);
+        return new QueryLoader(this,queryString);
     }
 
     @Override
