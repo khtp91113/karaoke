@@ -17,6 +17,8 @@ public class LyricBuilder {
 
     public List<LyricRow> getLrcRows(String rawLrc){
         if (rawLrc == null || rawLrc.length() == 0) return null;
+
+
         boolean title=true;
 
         StringReader reader = new StringReader(rawLrc);
@@ -26,13 +28,13 @@ public class LyricBuilder {
         try {
             do {
                 line = br.readLine();
-                int lastIndex = line.lastIndexOf("]");
 
                 if (line != null && line.length() > 0) {
 
                     List<LyricRow> lrcRows = new ArrayList<LyricRow>();
 
                     try {
+                        int lastIndex = line.lastIndexOf("]");
 
                         if(title){
                             String content = line.substring(lastIndex+1);
@@ -51,7 +53,6 @@ public class LyricBuilder {
                         }
                         else{
                             String content = line.substring(lastIndex+1);
-
                             String times = line.substring(0, lastIndex+1).replace("[", "").replace("]", "");
                             Log.i("LRC1",line);
                             Log.i("LRC",content);
@@ -64,6 +65,8 @@ public class LyricBuilder {
                             lrcRow.setStartTime(startTime);
                             lrcRows.add(lrcRow);
                         }
+
+
 
                     } catch (Exception e) {
 
@@ -84,7 +87,7 @@ public class LyricBuilder {
                     for (int i = 0; i < size; i++) {
                         LyricRow lrcRow = rows.get(i);
 
-                  if (i < size - 1) {
+                        if (i < size - 1) {
                             lrcRow.setEndTime(rows.get(i + 1).getStartTime());
                         } else {
                             lrcRow.setEndTime(lrcRow.getStartTime() + 10000);
@@ -104,6 +107,7 @@ public class LyricBuilder {
         }
         return rows;
     }
+
 
 
     /**
