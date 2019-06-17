@@ -2,10 +2,10 @@
 
 ## Topic
 
-設計一個卡拉ok軟體，用戶能連上server選擇自己想唱的歌曲，開心的唱 ε٩(๑> ₃ <)۶з
-還能分享引以為豪的錄音檔給其他用戶聆聽 (*´∀`)~♥
-*~~(用戶們自己要小心"胖虎"( ´థ౪థ）σ)~~*
->  This app is like a box of chocolates. You never know what you're gonna listen.
+設計一個卡拉ok軟體，用戶能連上server選擇自己想唱的歌曲，開心的唱 ε٩(๑> ₃ <)۶з<br/> 
+還能分享引以為豪的錄音檔給其他用戶聆聽 (*´∀`)~♥ <br/>
+*~~(用戶們自己要小心"胖虎"( ´థ౪థ）σ)~~* <br/>
+>  This app is like a box of chocolates. You never know what you're gonna listen.  
 
 
 ##### 註:2019 Android Class Final Project
