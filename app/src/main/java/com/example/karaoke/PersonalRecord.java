@@ -41,14 +41,13 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
         UID = intent.getIntExtra("UID_EXTRA",21);
 
         this.mQuery = "http://140.116.245.248:5000/QueryPersonalSongList?UID="+UID;
-        GetSongList();
-
 
         // 連結元件
         recycler_view = (RecyclerView) findViewById(R.id.recycler_view);
         recycler_view.setLayoutManager(new LinearLayoutManager(this));
         recycler_view.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
+        GetSongList();
         // 將資料交給adapter
         //adapter = new PersonalRecordAdapter(MusicName,Artist,UID);
         // 設置adapter給recycler_view
@@ -107,6 +106,8 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
                 JSONArray arr = new JSONArray(s);
                 Log.d("Parsed JSON", Integer.toString(arr.length()));
                 PersonalRecord.SongObject[] songs = new PersonalRecord.SongObject[arr.length()];
+                Artist.clear();
+                MusicName.clear();
                 for (int i = 0; i < arr.length(); i++) {
                     JSONArray a = new JSONArray(arr.getString(i));
                     songs[i] = new PersonalRecord.SongObject(a);
