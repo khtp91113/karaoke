@@ -65,7 +65,7 @@ public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAd
                     intent.putExtra("MusicName", mData1.get(mPosition));
                     intent.putExtra("ArtistName", mArtistList.get(mPosition));
                     intent.putExtra("UID",mUID);
-                    intent.putExtra("mode","other");
+                    intent.putExtra("mode","self");
                     context.startActivity(intent);
                 }
             });

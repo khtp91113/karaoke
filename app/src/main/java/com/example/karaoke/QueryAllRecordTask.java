@@ -48,13 +48,13 @@ public class QueryAllRecordTask extends AsyncTask<String, Void, RecordObject[]> 
                 JSONArray arr = new JSONArray(result.toString());
                 Log.i("show", String.valueOf(arr.length()));
                 RecordObject[] records = new RecordObject[arr.length()];
-                for (int i = 0; i < arr.length(); i++){
+                for (int i = arr.length()-1, j = 0; i >= 0; i--, j++){
                     JSONObject json = arr.getJSONObject(i);
-                    records[i] = new RecordObject();
-                    records[i].setName(json.getString("PersonalMusicName"));
-                    records[i].setTimeStamp(json.getString("Timestamp"));
-                    records[i].setUID(json.getInt("UID"));
-                    records[i].setUserName(json.getString("userName"));
+                    records[j] = new RecordObject();
+                    records[j].setName(json.getString("PersonalMusicName"));
+                    records[j].setTimeStamp(json.getString("Timestamp"));
+                    records[j].setUID(json.getInt("UID"));
+                    records[j].setUserName(json.getString("userName"));
                 }
                 return records;
             }
