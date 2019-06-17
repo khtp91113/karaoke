@@ -10,8 +10,8 @@
 
 ##### 註:2019 Android Class Final Project
 
-## APK Link (GDrive)
-...
+## APK Link
+[APK](https://github.com/khtp91113/karaoke/blob/master/release/app-release.apk)
 
 ## Libraray
 - [SoundTouch](https://gitlab.com/soundtouch/soundtouch)
