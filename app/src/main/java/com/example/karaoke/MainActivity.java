@@ -90,10 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void showOnlineRecord(View view) throws ExecutionException, InterruptedException {
         RecordObject[] records = new QueryAllRecordTask().execute("http://140.116.245.248:5000").get();
-        Log.i("show", records[0].Name);
-        Log.i("show", records[1].Name);
         if (records != null){
-            Log.i("show", "123");
             OnlineRecordAdapter newAdapter = new OnlineRecordAdapter(MainActivity.this, records);
             mRecyclerView.setAdapter(newAdapter);
             smallperson.setVisibility(View.INVISIBLE);
