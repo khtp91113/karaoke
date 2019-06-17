@@ -2,6 +2,7 @@ package com.example.karaoke;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -58,6 +59,8 @@ public class SongGroupContentAdapter  extends
         public SongGroupContentHolder(View itemView, SongGroupContentAdapter adapter) {
             super(itemView);
             mButton = itemView.findViewById(R.id.button2);
+            Typeface titleFont = Typeface.createFromAsset(itemView.getContext().getAssets(),"fonts/cfont.ttf");
+            mButton.setTypeface(titleFont);
             this.mAdapter = adapter;
             this.context = itemView.getContext();
 

@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -66,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
         int width = size.x;
         ((Button)findViewById(R.id.mainPage)).setWidth(width/2);
         ((Button)findViewById(R.id.onlineRecord)).setWidth(width/2);
+        Typeface titleFont = Typeface.createFromAsset(this.getAssets(),"fonts/cfont.ttf");
+        ((Button)findViewById(R.id.mainPage)).setTypeface(titleFont);
+        ((Button)findViewById(R.id.onlineRecord)).setTypeface(titleFont);
     }
 
 
