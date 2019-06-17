@@ -2,6 +2,7 @@ package com.example.karaoke;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -42,9 +43,9 @@ public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAd
         return new ViewHolder(view);
     }
 
-    @Override
     public void onBindViewHolder(@NonNull PersonalRecordAdapter.ViewHolder viewHolder, int i) {
         viewHolder.txtItem1.setText(mData1.get(i));
+
     }
 
     @Override
@@ -60,6 +61,9 @@ public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAd
             super(itemView);
             txtItem1 = (TextView) itemView.findViewById(R.id.txtItem1);
             btnRemove = (Button) itemView.findViewById(R.id.btnRemove);
+            Typeface titleFont = Typeface.createFromAsset(itemView.getContext().getAssets(),"fonts/cfont.ttf");
+            txtItem1.setTypeface(titleFont);
+            btnRemove.setTypeface(titleFont);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
