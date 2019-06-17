@@ -17,8 +17,8 @@ public class LyricBuilder {
 
     public List<LyricRow> getLrcRows(String rawLrc){
         if (rawLrc == null || rawLrc.length() == 0) return null;
+        boolean title=true;
 
-        boolean firstline=true;
         StringReader reader = new StringReader(rawLrc);
         BufferedReader br = new BufferedReader(reader);
         String line = null;
@@ -26,6 +26,7 @@ public class LyricBuilder {
         try {
             do {
                 line = br.readLine();
+                int lastIndex = line.lastIndexOf("]");
 
                 if (line != null && line.length() > 0) {
 
@@ -33,25 +34,33 @@ public class LyricBuilder {
 
                     try {
 
-                        if(firstline) {
-                            String content = line.substring(11);
-                            //     Log.i("LRC1",line);
-                            //     Log.i("LRC",content);
-                            LyricRow lrcRow = new LyricRow();
-                            lrcRow.setContent(content);
-                            long startTime =0;
-                            lrcRow.setStartTime(startTime);
-                            lrcRows.add(lrcRow);
-                            firstline=false;
-                        }
-                        else {
-                            //從"]"，拆成前後兩段
-                            String content = line.substring(10);
-                            String times = line.substring(0, 10).replace("[", "").replace("]", "");
+                        if(title){
+                            String content = line.substring(lastIndex+1);
+
+                            Log.i("LRC1",line);
+                            Log.i("LRC",content);
 
                             LyricRow lrcRow = new LyricRow();
                             lrcRow.setContent(content);
+                            long startTime =0;
+                            Log.i("LRCTIME",startTime+"");
+                            lrcRow.setStartTime(startTime);
+                            lrcRows.add(lrcRow);
+
+                            title=false;
+                        }
+                        else{
+                            String content = line.substring(lastIndex+1);
+
+                            String times = line.substring(0, lastIndex+1).replace("[", "").replace("]", "");
+                            Log.i("LRC1",line);
+                            Log.i("LRC",content);
+
+                            LyricRow lrcRow = new LyricRow();
+                            lrcRow.setContent(content);
+                            // long startTime =0;
                             long startTime = timeConvert(times);
+                            Log.i("LRCTIME",startTime+"");
                             lrcRow.setStartTime(startTime);
                             lrcRows.add(lrcRow);
                         }
