@@ -123,55 +123,55 @@ Android Studio 3.3
 
 ## 程式畫面(功能)
 ### 主頁面
-![](https://i.imgur.com/oEmVFri.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/before_login.png)
 * 提供用戶以語言、歌手性別、熱門等分類的音樂
 * 畫面右上有用戶介面
     * 登入前人頭為黑色、登入後會變綠色
 * 畫面正下方能選擇是要唱歌還是聽別人存在Server上的錄音檔
 
 ### 聽其他人的錄音頁面
-![](https://i.imgur.com/3H7ZdQC.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/all_record.png)
 * 以上傳時間排序，可以看到是哪個用戶唱的什麼歌
 
 ### 登入頁面
-![](https://i.imgur.com/IB5f4VN.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/login.png)
 * 用戶未登入前點擊人頭會展示此頁面，用戶可以在此登入或註冊新帳號
 
 ### 用戶資訊
-![](https://i.imgur.com/XqJTzuT.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/user_detail.png)
 * 用戶登入後點擊人頭會展示用戶資訊
 * Check upload會列出所有用戶曾上傳過的錄音檔
 
 ### 個人錄音檔
-(補圖)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/show_personal_record.png)
 * 用戶可以播放自己的錄音檔
 * 系統會在本地端檢查錄音檔和歌詞是否還在，若否再連FTPS Server下載
 * 用戶可以刪除錄音檔(本地端、server都會刪除)
 
 ### 歌曲列表
-![](https://i.imgur.com/EdYFbNj.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/song_list.png)
 * 在主畫面選擇分類後會列出所有符合分類的歌，依序為歌名、歌手、唱歌次數
 
 ### 唱歌頁面
-![](https://i.imgur.com/nCRTGGv.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/sing_page.png)
 
 * 在剛進唱歌頁面時會檢查網路是連WIFI或是其他網路(4G)，若是其他網路會跳出詢問視窗確認是否要下載音訊檔
 * 使用動態歌詞，讓用戶能邊看邊唱，不怕忘詞
 * 設置多個功能按鈕，如切換原唱/去人聲版音樂、升降半音調、重唱、停止錄音等，可以長壓按鈕看該按鈕的功能
 
 ### 錄音設置頁面
-![](https://i.imgur.com/NGFCZTm.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/save_record.png)
 * 錄音停止後會進到本頁面，用戶可以在這對錄音檔和音樂的聲音大小做調整後再存檔
 * 用戶可以將錄音檔上傳到Server，分享給其他用戶
     * 未登入用戶沒有上傳功能
 
 ### 聽錄音檔頁面
-(補圖)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/listen_record.png)
 * 在個人錄音檔或聽其他人的錄音檔頁面選擇音訊後，都會開啟此頁面播放
 * 播放錄音的同時，提供動態歌詞觀看
 
 ## Flow Chart
-![](https://i.imgur.com/uzjDejl.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/flowChart.png)
 
 
 ## Future work
