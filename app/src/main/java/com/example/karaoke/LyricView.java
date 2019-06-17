@@ -5,8 +5,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,16 +30,18 @@ public class LyricView extends View {
 
 
     /**歌詞字體大小預設值*/
-    private int mLrcFontSize = 40;
+    private int mLrcFontSize = 50;
 
     /**Highlight歌詞字體大小預設值*/
-    private int mHighLightFontSize = 45;
+    private int mHighLightFontSize = 65;
 
     /**歌詞間距     **/
     private int mPaddingY = 20;
 
 
     private Paint mPaint;
+
+    private Context mContext;
 
     /**
      *  當前時間
@@ -47,8 +51,11 @@ public class LyricView extends View {
 
     public LyricView(Context context, AttributeSet attr) {
         super(context, attr);
+        mContext = context;
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setTextSize(mLrcFontSize);
+        Typeface font = Typeface.createFromAsset(mContext.getAssets(),"fonts/cfont.ttf");
+        mPaint.setTypeface(font);
     }
 
 

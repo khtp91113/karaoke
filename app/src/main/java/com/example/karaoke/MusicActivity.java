@@ -3,6 +3,7 @@ package com.example.karaoke;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Typeface;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -165,7 +166,8 @@ public class MusicActivity extends AppCompatActivity {
 
         /** Lyric initialize*/
         mLrcView=(LyricView)findViewById(R.id.lrcView);
-        String lrc = getFromAssets("FripSide-only my railgun.lrc");
+
+        String lrc = getFromAssets("Celine Dion-Beauty and the beast.lrc");
         LyricBuilder builder = new LyricBuilder();
         List<LyricRow> rows = builder.getLrcRows(lrc);
         mLrcView.setLrc(rows);
