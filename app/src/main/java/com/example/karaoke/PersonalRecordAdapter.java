@@ -21,13 +21,11 @@ import java.util.List;
 public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAdapter.ViewHolder> {
 
     private List<String> mData1;
-    private List<String> mMusicList;
     private List<String> mArtistList;
-    private List<String> mUID;
+    private Integer mUID;
 
-    PersonalRecordAdapter(List<String> data1, List<String> data2, List<String> data3, List<String> data4) {
+    PersonalRecordAdapter(List<String> data1, List<String> data3, Integer data4) {
         mData1 = data1;
-        mMusicList = data2;
         mArtistList = data3;
         mUID = data4;
     }
@@ -63,9 +61,10 @@ public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAd
                 public void onClick(View v) {
                     int mPosition = getLayoutPosition();
                     Context context = v.getContext();
-                    Intent intent = new Intent(context, MainActivity.class);
-                    intent.putExtra("MusicName_EXTRA", mMusicList.get(mPosition));
-                    intent.putExtra("Artist_EXTRA", mArtistList.get(mPosition));
+                    Intent intent = new Intent(context, ListenRecordActivity.class);
+                    intent.putExtra("MusicName", mData1.get(mPosition));
+                    intent.putExtra("ArtistName", mArtistList.get(mPosition));
+                    intent.putExtra("UID",mUID);
                     context.startActivity(intent);
                 }
             });
@@ -74,7 +73,7 @@ public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAd
                 public void onClick(View v) {
                     int mPosition = getLayoutPosition();
                     removeItem(getAdapterPosition());
-                    String queryString = "https://140.118.245.248/RemovePersonalSong?/UID="+ mUID.get(mPosition) +"&PersonalMusicName=" + mData1.get(mPosition);
+                    String queryString = "https://140.118.245.248/RemovePersonalSong?/UID="+ mUID +"&PersonalMusicName=" + mData1.get(mPosition);
 
 
                     // Hide the keyboard when the button is pushed.
@@ -100,7 +99,7 @@ public class PersonalRecordAdapter extends RecyclerView.Adapter<PersonalRecordAd
 
                         Bundle queryBundle = new Bundle();
                         queryBundle.putString("queryString", queryString);
-                        getSupportLoaderManager().restartLoader(0, queryBundle, this);
+                        //getSupportLoaderManager().restartLoader(0, queryBundle, this);
                     }
                     // Otherwise update the TextView to tell the user there is no
                     // connection, or no search term.
