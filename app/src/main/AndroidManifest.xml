@@ -47,6 +47,9 @@
         <activity android:name=".ListenRecordActivity">
 
         </activity>
+        <activity android:name=".PersonalRecord">
+
+        </activity>
     </application>
 
 </manifest>

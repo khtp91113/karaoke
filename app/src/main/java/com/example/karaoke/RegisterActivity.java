@@ -70,6 +70,8 @@ public class RegisterActivity extends AppCompatActivity implements  android.supp
 
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                setResult(RESULT_OK, null);
+                finish();
             } else {
                 Toast.makeText(this, s, Toast.LENGTH_SHORT);
             }

@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity implements  android.support
 
     public void OpenRegister(View view) {
         Intent i = new Intent(this,RegisterActivity.class);
-        startActivity(i);
+        startActivityForResult(i, 0);
     }
 
     public void login(View view) {
@@ -97,6 +97,10 @@ public class LoginActivity extends AppCompatActivity implements  android.support
         if (s != null) {
             if (s.contains("UID=")) {
                 int UID = Integer.parseInt(s.substring(4).replace("\n", "").replace("\r", ""));
+                if (UID == -1){
+                    Toast.makeText(this, "User not found or password error!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putInt("UID", UID);
@@ -104,6 +108,8 @@ public class LoginActivity extends AppCompatActivity implements  android.support
                 editor.commit();
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                setResult(RESULT_OK, null);
+                finish();
             } else {
                 Toast.makeText(this, s, Toast.LENGTH_SHORT);
             }
@@ -115,5 +121,14 @@ public class LoginActivity extends AppCompatActivity implements  android.support
     @Override
     public void onLoaderReset(@NonNull Loader<String> loader) {
 
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0){
+            if (resultCode == RESULT_OK){
+                setResult(RESULT_OK, null);
+                this.finish();
+            }
+        }
     }
 }
