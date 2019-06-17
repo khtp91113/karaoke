@@ -36,6 +36,8 @@ public class PersonalDetailActivity extends AppCompatActivity {
 
         Intent intent = new Intent(view.getContext(),MainActivity.class);
         startActivity(intent);
+        setResult(RESULT_OK);
+        finish();
     }
 
     public void ChangePassword(View view) {

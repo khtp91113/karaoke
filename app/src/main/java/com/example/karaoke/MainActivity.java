@@ -51,14 +51,21 @@ public class MainActivity extends AppCompatActivity {
         //TODO prompt login if not login
         if(UID ==0){
             Intent  intent = new Intent(view.getContext(),LoginActivity.class);
-            view.getContext().startActivity(intent);
+            this.startActivityForResult(intent, 0);
         }else{
             //Go to personal detail if already login
             Intent intent = new Intent(view.getContext(), PersonalDetailActivity.class);
             ActivityOptionsCompat options = (ActivityOptionsCompat) ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) view.getContext(),view.findViewById(R.id.view2),"profile");
-            view.getContext().startActivity(intent,options.toBundle());
+            this.startActivityForResult(intent, 0, options.toBundle());
         }
-
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0){
+            if (resultCode == RESULT_OK){
+                this.finish();
+            }
+        }
+    }
   }
