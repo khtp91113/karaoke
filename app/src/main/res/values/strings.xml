@@ -90,5 +90,6 @@
     <string name="server_host">140.116.245.248:5000</string>
     <string name="title_activity_sonlist">SonlistActivity</string>
     <string name="title_activity_login">LoginActivity</string>
+    <string name="remove_button">刪除</string>
 
 </resources>
