@@ -96,8 +96,12 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
             queryString = args.getString("queryString");
         }
 
+<<<<<<< HEAD
         return new QuerySongListTask(this, queryString);
 
+=======
+        return new QueryLoader(this,queryString);
+>>>>>>> be26c9ca4680d5adf78f633a144a814766793acd
     }
 
     @Override

@@ -6,4 +6,5 @@
     <integer name="Download_Done">3</integer>
     <integer name="Upload_Done">4</integer>
     <integer name="Record_Done">5</integer>
+    <integer name="Fetch_All_Record_Done">6</integer>
 </resources>
