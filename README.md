@@ -1,8 +1,14 @@
 # Karaoke
 
 ## Topic
-2019下學期 Android應用程式開發 期末專題 (lol) (哈chu)
-卡拉ok
+
+設計一個卡拉ok軟體，用戶能連上server選擇自己想唱的歌曲，開心的唱 ε٩(๑> ₃ <)۶з
+還能分享引以為豪的錄音檔給其他用戶聆聽 (*´∀`)~♥
+*~~(用戶們自己要小心"胖虎"( ´థ౪థ）σ)~~*
+>  This app is like a box of chocolates. You never know what you're gonna listen.
+
+
+##### 註:2019 Android Class Final Project
 
 ## APK Link (GDrive)
 ...
@@ -35,7 +41,7 @@ Android Studio 3.3
         - MySQL
         - vsftpd
         - python-flask
-        - 
+        
 ### MySQL
 - 作為整個專案儲存資料地方
 - 主要使用三張表格
@@ -137,9 +143,10 @@ Android Studio 3.3
 * Check upload會列出所有用戶曾上傳過的錄音檔
 
 ### 個人錄音檔
-
+(補圖)
 * 用戶可以播放自己的錄音檔
 * 系統會在本地端檢查錄音檔和歌詞是否還在，若否再連FTPS Server下載
+* 用戶可以刪除錄音檔(本地端、server都會刪除)
 
 ### 歌曲列表
 ![](https://i.imgur.com/EdYFbNj.png)
@@ -158,6 +165,15 @@ Android Studio 3.3
 * 用戶可以將錄音檔上傳到Server，分享給其他用戶
     * 未登入用戶沒有上傳功能
 
+### 聽錄音檔頁面
+(補圖)
+* 在個人錄音檔或聽其他人的錄音檔頁面選擇音訊後，都會開啟此頁面播放
+* 播放錄音的同時，提供動態歌詞觀看
+
+## Flow Chart
+![](https://i.imgur.com/uzjDejl.png)
+
+
 ## Future work
 1. 加入評分機制
     - 可以加入如音準(使用short FFT偵測人聲頻率)、咬字等評分項目
@@ -167,8 +183,8 @@ Android Studio 3.3
 3. 加入歌曲搜尋、多重篩選功能
 
 
-
 ## Contribution
-
-
-
+- 勞宏斌(25%):負責主頁面、用戶資訊頁面、登入註冊頁面、歌曲列表頁面 & 用戶資訊設定
+- 王俞婷(25%):負責動態歌詞抓取和顯示、設計唱歌頁面UI、程式美化(字體、圖片)
+- 方鈞麒(25%):負責音訊處理和歌唱頁面功能(eg. 錄音、升降key、音量比例調整...)
+- 陳俊佑(25%):負責錄音檔頁面、架伺服器(MySQL、FTPS server)，設計server和手機端溝通的API
