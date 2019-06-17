@@ -15,10 +15,6 @@
         android:id="@+id/btnRemove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-<<<<<<< HEAD
-        android:text="刪除" />
-=======
         android:text="remove_button" />
->>>>>>> be26c9ca4680d5adf78f633a144a814766793acd
 
 </LinearLayout>

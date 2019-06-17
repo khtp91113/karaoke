@@ -72,16 +72,16 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
             Bundle queryBundle = new Bundle();
             queryBundle.putString("queryString", mQuery);
             getSupportLoaderManager().restartLoader(0, queryBundle, this);
-            Toast.makeText(this, "Loading", Toast.LENGTH_SHORT);
+            Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show();
 
         }
         // Otherwise update the TextView to tell the user there is no
         // connection, or no search term.
         else {
             if (mQuery.length() == 0) {
-                Toast.makeText(this, "Empty return", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "Empty return", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Bad Connection Please Try Again", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "Bad Connection Please Try Again", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -96,12 +96,7 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
             queryString = args.getString("queryString");
         }
 
-<<<<<<< HEAD
         return new QuerySongListTask(this, queryString);
-
-=======
-        return new QueryLoader(this,queryString);
->>>>>>> be26c9ca4680d5adf78f633a144a814766793acd
     }
 
     @Override
@@ -126,7 +121,7 @@ public class PersonalRecord extends AppCompatActivity implements LoaderManager.L
 
             }
         } else {
-            Toast.makeText(this, "Bad Connection Please Try Again", Toast.LENGTH_SHORT);
+            Toast.makeText(this, "Bad Connection Please Try Again", Toast.LENGTH_SHORT).show();
         }
     }
 
