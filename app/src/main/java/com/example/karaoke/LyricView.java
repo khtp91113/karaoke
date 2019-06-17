@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -40,6 +41,7 @@ public class LyricView extends View {
 
 
     private Paint mPaint;
+    private Context mContext;
 
     /**
      *  當前時間
@@ -49,8 +51,11 @@ public class LyricView extends View {
 
     public LyricView(Context context, AttributeSet attr) {
         super(context, attr);
+        mContext = context;
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setTextSize(mLrcFontSize);
+        Typeface font = Typeface.createFromAsset(mContext.getAssets(),"fonts/cfont.ttf");
+        mPaint.setTypeface(font);
     }
 
 
