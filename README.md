@@ -143,7 +143,7 @@ Android Studio 3.3
 * Check upload會列出所有用戶曾上傳過的錄音檔
 
 ### 個人錄音檔
-![](https://github.com/khtp91113/karaoke/blob/master/screenshots/show_personal_record.png)
+![](https://github.com/khtp91113/karaoke/blob/master/screenshots/show_personal_records.png)
 * 用戶可以播放自己的錄音檔
 * 系統會在本地端檢查錄音檔和歌詞是否還在，若否再連FTPS Server下載
 * 用戶可以刪除錄音檔(本地端、server都會刪除)
