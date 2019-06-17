@@ -1,5 +1,7 @@
 package com.example.karaoke;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -12,9 +14,15 @@ import java.util.List;
 
 public class LyricBuilder {
 
+    public int maxlength=0;
+
+    public int getMaxlength() {return maxlength;}
+
     public List<LyricRow> getLrcRows(String rawLrc){
         if (rawLrc == null || rawLrc.length() == 0) return null;
 
+
+        boolean title=true;
 
         StringReader reader = new StringReader(rawLrc);
         BufferedReader br = new BufferedReader(reader);
@@ -29,16 +37,40 @@ public class LyricBuilder {
                     List<LyricRow> lrcRows = new ArrayList<LyricRow>();
 
                     try {
+                        int lastIndex = line.lastIndexOf("]");
 
-                        //從"]"，拆成前後兩段
-                        String content = line.substring(10);
-                        String times = line.substring(0, 10).replace("[", "").replace("]", "");
+                        if(title){
+                            String content = line.substring(lastIndex+1);
+                            if(content.length()>maxlength) maxlength=content.length();
 
-                        LyricRow lrcRow = new LyricRow();
-                        lrcRow.setContent(content);
-                        long startTime = timeConvert(times);
-                        lrcRow.setStartTime(startTime);
-                        lrcRows.add(lrcRow);
+                            Log.i("LRC1",line);
+                            Log.i("LRC",content);
+
+                            LyricRow lrcRow = new LyricRow();
+                            lrcRow.setContent(content);
+                            long startTime =0;
+                            Log.i("LRCTIME",startTime+"");
+                            lrcRow.setStartTime(startTime);
+                            lrcRows.add(lrcRow);
+
+                            title=false;
+                        }
+                        else{
+                            String content = line.substring(lastIndex+1);
+                            if(content.length()>maxlength) maxlength=content.length();
+                            String times = line.substring(0, lastIndex+1).replace("[", "").replace("]", "");
+                            Log.i("LRC1",line);
+                            Log.i("LRC",content);
+
+                            LyricRow lrcRow = new LyricRow();
+                            lrcRow.setContent(content);
+                            // long startTime =0;
+                            long startTime = timeConvert(times);
+                            Log.i("LRCTIME",startTime+"");
+                            lrcRow.setStartTime(startTime);
+                            lrcRows.add(lrcRow);
+                        }
+
 
 
                     } catch (Exception e) {

@@ -43,4 +43,9 @@ public class MainActivity extends AppCompatActivity {
         view.getContext().startActivity(intent,options.toBundle());
     }
 
+    public void test(View view){
+        Intent intent = new Intent(this,MusicActivity.class);
+        startActivity(intent);
+    }
+
 }

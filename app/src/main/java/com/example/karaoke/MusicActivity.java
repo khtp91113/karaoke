@@ -165,7 +165,7 @@ public class MusicActivity extends AppCompatActivity {
 
         /** Lyric initialize*/
         mLrcView=(LyricView)findViewById(R.id.lrcView);
-        String lrc = getFromAssets("onion.lrc");
+        String lrc = getFromAssets("FripSide-only my railgun.lrc");
         LyricBuilder builder = new LyricBuilder();
         List<LyricRow> rows = builder.getLrcRows(lrc);
         mLrcView.setLrc(rows);
