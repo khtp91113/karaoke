@@ -33,7 +33,7 @@ public class LyricView extends View {
     private int mLrcFontSize = 50;
 
     /**Highlight歌詞字體大小預設值*/
-    private int mHighLightFontSize = 45;
+    private int mHighLightFontSize = 65;
 
     /**歌詞間距     **/
     private int mPaddingY = 20;
