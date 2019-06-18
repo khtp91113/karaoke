@@ -11,7 +11,7 @@
 ##### 註:2019 Android Class Final Project
 
 ## APK Link
-[APK](https://github.com/khtp91113/karaoke/blob/master/release/app-release.apk)
+[APK](https://github.com/khtp91113/karaoke/blob/master/app/build/outputs/apk/debug/app-debug.apk)
 
 ## Library
 - [SoundTouch](https://gitlab.com/soundtouch/soundtouch)
