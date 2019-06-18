@@ -13,7 +13,7 @@
 ## APK Link
 [APK](https://github.com/khtp91113/karaoke/blob/master/release/app-release.apk)
 
-## Libraray
+## Library
 - [SoundTouch](https://gitlab.com/soundtouch/soundtouch)
     - 音訊編輯C++ library，提供調整pitch、播放速度等功能
     - 本專題用於調整音訊的pitch，達到升降key功能
